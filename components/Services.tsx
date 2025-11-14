@@ -18,7 +18,12 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ icon, title, description, ind
       }`}
       style={{ transitionDelay: `${index * 100}ms` }}
     >
-      <div className="bg-brand-green-100 text-brand-green-700 rounded-full p-4 mb-6">
+      <div 
+        className={`bg-brand-green-100 text-brand-green-700 rounded-full p-4 mb-6 transition-all duration-300 ease-out transform ${
+          isVisible ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-75 -rotate-12'
+        }`}
+        style={{ transitionDelay: `${index * 100 + 200}ms` }}
+      >
         {icon}
       </div>
       <h3 className="text-2xl font-bold text-gray-900 mb-3">{title}</h3>

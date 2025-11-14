@@ -2,48 +2,50 @@
 import React, { useState, useEffect, useRef } from 'react';
 import CalendlyModal from './CalendlyModal';
 
+// Utilisation d'un seul objet vidéo comme demandé
+const video = {
+  theme: 'Intérieur d\'Hôtel Luxueux',
+  poster: "https://images.pexels.com/videos/7578550/pexels-photo-7578550.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+  sources: [
+    { src: "https://videos.pexels.com/video-files/7578550/7578550-hd_1920_1080_30fps.mp4", type: "video/mp4" }
+  ]
+};
+
 const Hero: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isTextVisible, setIsTextVisible] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const [loadVideo, setLoadVideo] = useState(false);
+  const heroRef = useRef<HTMLElement>(null);
 
+  // Effet pour l'animation du texte au chargement
   useEffect(() => {
-    const timer = setTimeout(() => setIsTextVisible(true), 200);
-    return () => clearTimeout(timer);
+    const textTimer = setTimeout(() => setIsTextVisible(true), 200);
+    return () => clearTimeout(textTimer);
   }, []);
 
+  // Effet pour l'IntersectionObserver qui déclenche le chargement de la vidéo
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        const videoElement = videoRef.current;
-        if (entry.isIntersecting && videoElement && videoElement.children.length === 0) {
-          const sources = [
-            { src: "https://cdn.coverr.co/videos/coverr-maldives-beach-resort-373/1080p.webm", type: "video/webm" },
-            { src: "https://cdn.coverr.co/videos/coverr-maldives-beach-resort-373/1080p.mp4", type: "video/mp4" }
-          ];
-
-          sources.forEach(sourceInfo => {
-            const source = document.createElement('source');
-            source.src = sourceInfo.src;
-            source.type = sourceInfo.type;
-            videoElement.appendChild(source);
-          });
-          
-          videoElement.load();
-          observer.disconnect();
+        // La section Hero est "au-dessus de la ligne de flottaison", elle sera donc immédiatement visible.
+        // L'observateur s'assure que nous ne chargeons la vidéo que lorsque le navigateur est prêt à l'afficher.
+        if (entry.isIntersecting) {
+          setLoadVideo(true);
+          observer.disconnect(); // Se déconnecte une fois visible pour éviter un déclenchement inutile
         }
       },
-      { rootMargin: '200px' }
+      // Le seuil 0.01 signifie que l'observateur se déclenchera dès qu'un seul pixel sera visible.
+      { threshold: 0.01 }
     );
 
-    const currentRef = videoRef.current;
-    if (currentRef) {
-      observer.observe(currentRef);
+    const currentHeroRef = heroRef.current;
+    if (currentHeroRef) {
+      observer.observe(currentHeroRef);
     }
 
     return () => {
-      if (currentRef) {
-        observer.unobserve(currentRef);
+      if (currentHeroRef) {
+        observer.unobserve(currentHeroRef);
       }
     };
   }, []);
@@ -54,17 +56,26 @@ const Hero: React.FC = () => {
 
   return (
     <>
-      <section id="home" className="relative h-screen flex items-center justify-center text-white overflow-hidden">
+      <section 
+        id="home" 
+        ref={heroRef} // Attache la ref à la section pour l'observer
+        className="relative h-screen flex items-center justify-center text-white overflow-hidden"
+      >
         <div className="absolute inset-0 bg-black opacity-50 z-10"></div>
         <video 
-          ref={videoRef}
           autoPlay
           loop
           muted
           playsInline
-          poster="https://images.pexels.com/photos/1483053/pexels-photo-1483053.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+          poster={video.poster}
           className="absolute z-0 w-auto min-w-full min-h-full max-w-none object-cover animate-video-fade-in"
+          // preload="metadata" permet de charger les informations de base de la vidéo sans télécharger le fichier entier.
+          preload="metadata"
         >
+          {/* Les sources vidéo ne sont rendues que lorsque la section est visible, ce qui déclenche le chargement paresseux. */}
+          {loadVideo && video.sources.map((source, index) => (
+             <source key={index} src={source.src} type={source.type} />
+          ))}
           Votre navigateur ne supporte pas la balise vidéo.
         </video>
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent z-10"></div>
