@@ -30,7 +30,7 @@ const Header: React.FC = () => {
     { href: '#services', label: 'Services' },
     { href: '#portfolio', label: 'Portfolio' },
     { href: '#testimonials', label: 'Témoignages' },
-    { href: '#contact', label: 'Contact' },
+    { href: '#contact', label: 'Offres & Tarifs' },
   ];
 
   return (
@@ -46,11 +46,11 @@ const Header: React.FC = () => {
             ))}
           </nav>
           {isAdmin ? (
-             <button onClick={logout} className="hidden md:inline-block bg-red-600 text-white font-bold py-2 px-6 rounded-full hover:bg-red-700 transition-transform duration-300 hover:scale-105">
+             <button onClick={logout} className="hidden md:inline-block bg-red-600 text-white font-bold py-2 px-6 rounded-full hover:bg-red-700 transition-transform duration-300 transform hover:scale-105 active:scale-100">
               Déconnexion
             </button>
           ) : (
-            <a href="#contact" className="hidden md:inline-block font-bold py-2 px-6 rounded-full transition-all duration-300 hover:scale-105 bg-white text-brand-green-700 hover:bg-gray-100">
+            <a href="#contact" className="hidden md:inline-block font-bold py-2 px-6 rounded-full transition-all duration-300 transform hover:scale-105 active:scale-100 bg-white text-brand-green-700 hover:bg-gray-100">
               Commençons
             </a>
           )}
@@ -72,11 +72,11 @@ const Header: React.FC = () => {
                 <NavLink key={link.href} {...link} isMobile={true} onClick={() => setIsMenuOpen(false)} />
               ))}
               {isAdmin ? (
-                <button onClick={() => { logout(); setIsMenuOpen(false); }} className="bg-red-600 text-white font-bold py-3 px-6 rounded-full hover:bg-red-700 transition-transform duration-300 hover:scale-105 text-center">
+                <button onClick={() => { logout(); setIsMenuOpen(false); }} className="bg-red-600 text-white font-bold py-3 px-6 rounded-full hover:bg-red-700 transition-transform duration-300 transform hover:scale-105 active:scale-100 text-center">
                   Déconnexion
                 </button>
               ) : (
-                <a href="#contact" onClick={() => setIsMenuOpen(false)} className="font-bold py-3 px-6 rounded-full transition-all duration-300 hover:scale-105 text-center bg-white text-brand-green-700 hover:bg-gray-100">
+                <a href="#contact" onClick={() => setIsMenuOpen(false)} className="font-bold py-3 px-6 rounded-full transition-all duration-300 transform hover:scale-105 active:scale-100 text-center bg-white text-brand-green-700 hover:bg-gray-100">
                   Commençons
                 </a>
               )}

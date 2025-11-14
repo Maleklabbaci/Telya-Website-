@@ -7,37 +7,12 @@ interface ServiceCardProps {
   title: string;
   description: string;
   index: number;
+  isVisible: boolean;
 }
 
-const ServiceCard: React.FC<ServiceCardProps> = ({ icon, title, description, index }) => {
-  const [isVisible, setIsVisible] = useState(false);
-  const cardRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    if (cardRef.current) {
-      observer.observe(cardRef.current);
-    }
-
-    return () => {
-      if(cardRef.current) {
-        observer.unobserve(cardRef.current)
-      }
-    };
-  }, []);
-
+const ServiceCard: React.FC<ServiceCardProps> = ({ icon, title, description, index, isVisible }) => {
   return (
     <div
-      ref={cardRef}
       className={`bg-white p-8 rounded-xl shadow-lg hover:shadow-2xl hover:-translate-y-2 hover:scale-105 border border-gray-100 flex flex-col items-center text-center transform transition-[opacity,transform] duration-500 ease-[cubic-bezier(0.175,0.885,0.32,1.275)] ${
         isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
       }`}
@@ -54,20 +29,35 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ icon, title, description, ind
 
 const Services: React.FC = () => {
   const [headerVisible, setHeaderVisible] = useState(false);
+  const [gridVisible, setGridVisible] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(([entry]) => {
+    const headerObserver = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) {
         setHeaderVisible(true);
-        observer.disconnect();
+        headerObserver.disconnect();
       }
     }, { threshold: 0.1 });
 
-    const currentRef = headerRef.current;
-    if (currentRef) observer.observe(currentRef);
+    const currentHeaderRef = headerRef.current;
+    if (currentHeaderRef) headerObserver.observe(currentHeaderRef);
+
+    const gridObserver = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setGridVisible(true);
+        gridObserver.disconnect();
+      }
+    }, { threshold: 0.1, rootMargin: "-100px" });
+
+    const currentGridRef = gridRef.current;
+    if (currentGridRef) gridObserver.observe(currentGridRef);
     
-    return () => { if(currentRef) observer.unobserve(currentRef) };
+    return () => { 
+      if(currentHeaderRef) headerObserver.unobserve(currentHeaderRef);
+      if(currentGridRef) gridObserver.unobserve(currentGridRef);
+    };
   }, []);
   
   const services = [
@@ -122,9 +112,9 @@ const Services: React.FC = () => {
             Des stratégies sur mesure pour transformer votre présence en ligne et booster vos réservations.
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {services.map((service, index) => (
-            <ServiceCard key={index} {...service} index={index} />
+            <ServiceCard key={index} {...service} index={index} isVisible={gridVisible} />
           ))}
         </div>
       </div>

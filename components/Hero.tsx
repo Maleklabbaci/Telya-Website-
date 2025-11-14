@@ -4,9 +4,8 @@ import CalendlyModal from './CalendlyModal';
 
 const Hero: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [loadVideo, setLoadVideo] = useState(false);
   const [isTextVisible, setIsTextVisible] = useState(false);
-  const heroRef = useRef<HTMLElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsTextVisible(true), 200);
@@ -16,21 +15,28 @@ const Hero: React.FC = () => {
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          if ('requestIdleCallback' in window) {
-            (window as any).requestIdleCallback(() => {
-              setLoadVideo(true);
-            }, { timeout: 2000 });
-          } else {
-            setTimeout(() => setLoadVideo(true), 500);
-          }
+        const videoElement = videoRef.current;
+        if (entry.isIntersecting && videoElement && videoElement.children.length === 0) {
+          const sources = [
+            { src: "https://cdn.coverr.co/videos/coverr-maldives-beach-resort-373/1080p.webm", type: "video/webm" },
+            { src: "https://cdn.coverr.co/videos/coverr-maldives-beach-resort-373/1080p.mp4", type: "video/mp4" }
+          ];
+
+          sources.forEach(sourceInfo => {
+            const source = document.createElement('source');
+            source.src = sourceInfo.src;
+            source.type = sourceInfo.type;
+            videoElement.appendChild(source);
+          });
+          
+          videoElement.load();
           observer.disconnect();
         }
       },
       { rootMargin: '200px' }
     );
 
-    const currentRef = heroRef.current;
+    const currentRef = videoRef.current;
     if (currentRef) {
       observer.observe(currentRef);
     }
@@ -48,34 +54,26 @@ const Hero: React.FC = () => {
 
   return (
     <>
-      <section ref={heroRef} id="home" className="relative h-screen flex items-center justify-center text-white overflow-hidden">
+      <section id="home" className="relative h-screen flex items-center justify-center text-white overflow-hidden">
         <div className="absolute inset-0 bg-black opacity-50 z-10"></div>
-        <img 
-          src="https://images.pexels.com/photos/1483053/pexels-photo-1483053.jpeg?auto=compress&cs=tinysrgb&w=800&fit=crop&h=500" 
-          alt="Luxury resort pier over turquoise water"
-          className="absolute z-0 w-full h-full object-cover"
-        />
-        {loadVideo && (
-            <video 
-              autoPlay
-              loop
-              muted
-              playsInline
-              poster="https://images.pexels.com/photos/1483053/pexels-photo-1483053.jpeg?auto=compress&cs=tinysrgb&w=800&fit=crop&h=500"
-              className="absolute z-0 w-auto min-w-full min-h-full max-w-none object-cover animate-video-fade-in"
-            >
-              <source src="https://cdn.coverr.co/videos/coverr-maldives-beach-resort-373/1080p.webm" type="video/webm" />
-              <source src="https://cdn.coverr.co/videos/coverr-maldives-beach-resort-373/1080p.mp4" type="video/mp4" />
-              Votre navigateur ne supporte pas la balise vidéo.
-            </video>
-        )}
+        <video 
+          ref={videoRef}
+          autoPlay
+          loop
+          muted
+          playsInline
+          poster="https://images.pexels.com/photos/1483053/pexels-photo-1483053.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+          className="absolute z-0 w-auto min-w-full min-h-full max-w-none object-cover animate-video-fade-in"
+        >
+          Votre navigateur ne supporte pas la balise vidéo.
+        </video>
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent z-10"></div>
         <div className="relative z-20 text-center px-6">
           <h1 className={`text-4xl md:text-6xl lg:text-7xl font-extrabold mb-4 drop-shadow-lg leading-tight transition-all duration-700 ease-out ${isTextVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`} style={{ transitionDelay: '100ms' }}>
             Boostez Votre Visibilité
           </h1>
           <p className={`text-lg md:text-2xl mb-8 max-w-3xl mx-auto drop-shadow-md font-light transition-all duration-700 ease-out ${isTextVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`} style={{ transitionDelay: '300ms' }}>
-            Plus de 50 clients satisfaits grâce à nos stratégies qui transforment l’audience en réservations..
+            Plus de 100 clients satisfaits grâce à nos stratégies qui transforment l’audience en réservations..
           </p>
           <button 
             onClick={openCalendly}

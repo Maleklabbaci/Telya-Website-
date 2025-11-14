@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 
 interface TestimonialCardProps {
@@ -7,37 +6,12 @@ interface TestimonialCardProps {
   title: string;
   avatarSrc: string;
   index: number;
+  isVisible: boolean;
 }
 
-const TestimonialCard: React.FC<TestimonialCardProps> = ({ quote, author, title, avatarSrc, index }) => {
-    const [isVisible, setIsVisible] = useState(false);
-    const cardRef = useRef<HTMLDivElement>(null);
-  
-    useEffect(() => {
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) {
-            setIsVisible(true);
-            observer.disconnect();
-          }
-        },
-        { threshold: 0.1 }
-      );
-  
-      if (cardRef.current) {
-        observer.observe(cardRef.current);
-      }
-  
-      return () => {
-        if (cardRef.current) {
-            observer.unobserve(cardRef.current)
-        }
-      };
-    }, []);
-
+const TestimonialCard: React.FC<TestimonialCardProps> = ({ quote, author, title, avatarSrc, index, isVisible }) => {
     return (
         <div 
-            ref={cardRef}
             className={`bg-white p-8 rounded-xl shadow-lg border border-gray-100 flex flex-col items-center text-center transition-all duration-500 transform h-full ${
                 isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
             }`}
@@ -56,20 +30,35 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({ quote, author, title,
 
 const Testimonials: React.FC = () => {
   const [headerVisible, setHeaderVisible] = useState(false);
+  const [gridVisible, setGridVisible] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(([entry]) => {
+    const headerObserver = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) {
         setHeaderVisible(true);
-        observer.disconnect();
+        headerObserver.disconnect();
       }
     }, { threshold: 0.1 });
 
-    const currentRef = headerRef.current;
-    if (currentRef) observer.observe(currentRef);
+    const gridObserver = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setGridVisible(true);
+        gridObserver.disconnect();
+      }
+    }, { threshold: 0.1 });
+
+    const currentHeaderRef = headerRef.current;
+    if (currentHeaderRef) headerObserver.observe(currentHeaderRef);
     
-    return () => { if(currentRef) observer.unobserve(currentRef) };
+    const currentGridRef = gridRef.current;
+    if (currentGridRef) gridObserver.observe(currentGridRef);
+    
+    return () => { 
+      if(currentHeaderRef) headerObserver.unobserve(currentHeaderRef);
+      if(currentGridRef) gridObserver.unobserve(currentGridRef);
+    };
   }, []);
 
   const testimonials = [
@@ -120,9 +109,9 @@ const Testimonials: React.FC = () => {
             La confiance de nos partenaires est notre plus grande fierté.
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {testimonials.map((testimonial, index) => (
-                <TestimonialCard key={index} {...testimonial} index={index} />
+                <TestimonialCard key={index} {...testimonial} index={index} isVisible={gridVisible} />
             ))}
         </div>
       </div>
