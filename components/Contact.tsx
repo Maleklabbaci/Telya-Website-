@@ -19,21 +19,9 @@ const Contact: React.FC = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [headerVisible, setHeaderVisible] = useState(false);
-  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const formContainerRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('form-success') === 'true') {
-      setShowSuccessMessage(true);
-      if (window.history.replaceState) {
-        const cleanUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}#contact`;
-        window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
-      }
-    }
-  }, []);
 
   useEffect(() => {
     const formObserver = new IntersectionObserver(
@@ -111,16 +99,6 @@ const Contact: React.FC = () => {
     }
   };
 
-  const resetForm = () => {
-    setFormData({ name: '', email: '', companyName: '', message: '' });
-    setFile(null);
-    setErrors({});
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-    setShowSuccessMessage(false);
-  };
-
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const newErrors: { name?: string; email?: string; message?: string } = {};
@@ -142,7 +120,7 @@ const Contact: React.FC = () => {
     e.currentTarget.submit();
   };
 
-  const nextUrl = typeof window !== 'undefined' ? `${window.location.origin}${window.location.pathname}?form-success=true#contact` : '';
+  const nextUrl = typeof window !== 'undefined' ? `${window.location.origin}/thank-you` : '';
 
   return (
     <section id="contact" className="py-20 bg-white">
@@ -160,20 +138,6 @@ const Contact: React.FC = () => {
             isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
           }`}
         >
-          {showSuccessMessage ? (
-            <div className="text-center py-8">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Message envoyé avec succès !</h3>
-              <p className="text-gray-600 leading-relaxed mb-8">
-                Merci de nous avoir contactés. Nous avons bien reçu votre message et reviendrons vers vous dans les plus brefs délais.
-              </p>
-              <button
-                onClick={resetForm}
-                className="bg-brand-green-600 text-white font-bold py-3 px-10 rounded-full text-lg hover:bg-brand-green-700 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg"
-              >
-                Envoyer un autre message
-              </button>
-            </div>
-          ) : (
             <form 
               action="https://formsubmit.co/telyaagency@gmail.com" 
               method="POST" 
@@ -277,7 +241,6 @@ const Contact: React.FC = () => {
                 </button>
               </div>
             </form>
-          )}
         </div>
       </div>
     </section>
