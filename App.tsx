@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import Services from './components/Services';
@@ -11,7 +11,8 @@ import { AuthProvider } from './contexts/AuthContext';
 import AdminLoginPage from './pages/AdminLoginPage';
 
 const MainSite: React.FC = () => {
-  // FIX: Import useEffect from react.
+  const [contactMessage, setContactMessage] = useState('');
+
   useEffect(() => {
     const handleSmoothScroll = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
@@ -50,9 +51,9 @@ const MainSite: React.FC = () => {
       <main>
         <Hero />
         <Services />
-        <Portfolio />
+        <Portfolio setContactMessage={setContactMessage} />
         <Testimonials />
-        <Contact />
+        <Contact contactMessage={contactMessage} setContactMessage={setContactMessage} />
       </main>
       <Footer />
     </div>
@@ -61,9 +62,9 @@ const MainSite: React.FC = () => {
 
 
 const App: React.FC = () => {
-  const [path, setPath] = React.useState(window.location.pathname);
+  const [path, setPath] = useState(window.location.pathname);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const onLocationChange = () => {
       setPath(window.location.pathname);
     };

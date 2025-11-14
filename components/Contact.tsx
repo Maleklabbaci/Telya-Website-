@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 const UploadIcon: React.FC = () => (
@@ -6,7 +7,12 @@ const UploadIcon: React.FC = () => (
     </svg>
 );
 
-const Contact: React.FC = () => {
+interface ContactProps {
+  contactMessage: string;
+  setContactMessage: (message: string) => void;
+}
+
+const Contact: React.FC<ContactProps> = ({ contactMessage, setContactMessage }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -17,9 +23,26 @@ const Contact: React.FC = () => {
   const [errors, setErrors] = useState<{ name?: string; email?: string; message?: string }>({});
   const [isDragging, setIsDragging] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
-  const [submissionStatus, setSubmissionStatus] = useState<'idle' | 'submitting' | 'submitted' | 'error'>('idle');
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const formContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('form-success') === 'true') {
+      setShowSuccessMessage(true);
+      if (window.history.replaceState) {
+        const cleanUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}#contact`;
+        window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
+      }
+    }
+  }, []);
+  
+  useEffect(() => {
+    if (contactMessage) {
+        setFormData(prev => ({ ...prev, message: contactMessage }));
+    }
+  }, [contactMessage]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -94,10 +117,11 @@ const Contact: React.FC = () => {
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
-    setSubmissionStatus('idle');
+    setShowSuccessMessage(false);
+    setContactMessage('');
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const newErrors: { name?: string; email?: string; message?: string } = {};
 
@@ -115,30 +139,10 @@ const Contact: React.FC = () => {
     }
     
     setErrors({});
-    setSubmissionStatus('submitting');
-
-    const formElement = e.currentTarget;
-    const formPayload = new FormData(formElement);
-
-    try {
-        const response = await fetch(formElement.action, {
-            method: 'POST',
-            body: formPayload,
-            headers: {
-                'Accept': 'application/json'
-            },
-        });
-        
-        if (response.ok) {
-            setSubmissionStatus('submitted');
-        } else {
-            setSubmissionStatus('error');
-        }
-    } catch (error) {
-        console.error('Form submission error:', error);
-        setSubmissionStatus('error');
-    }
+    e.currentTarget.submit();
   };
+
+  const nextUrl = typeof window !== 'undefined' ? `${window.location.origin}${window.location.pathname}?form-success=true#contact` : '';
 
   return (
     <section id="contact" className="py-20 bg-white">
@@ -156,7 +160,7 @@ const Contact: React.FC = () => {
             isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
           }`}
         >
-          {submissionStatus === 'submitted' ? (
+          {showSuccessMessage ? (
             <div className="text-center py-8">
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Message envoyé avec succès !</h3>
               <p className="text-gray-600 leading-relaxed mb-8">
@@ -170,115 +174,109 @@ const Contact: React.FC = () => {
               </button>
             </div>
           ) : (
-            <>
-              {submissionStatus === 'error' && (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6 text-center" role="alert">
-                  <strong className="font-bold">Erreur !</strong>
-                  <p>Une erreur est survenue lors de l'envoi du message. Veuillez réessayer.</p>
-                </div>
-              )}
-              <form 
-                action="https://formsubmit.co/telyaagency@gmail.com" 
-                method="POST" 
-                encType="multipart/form-data"
-                onSubmit={handleSubmit} 
-                className="space-y-6"
-              >
-                <input type="hidden" name="_subject" value={`Nouveau message de ${formData.companyName || formData.name}`} />
-                <input type="hidden" name="_captcha" value="false" />
+            <form 
+              action="https://formsubmit.co/telyaagency@gmail.com" 
+              method="POST" 
+              encType="multipart/form-data"
+              onSubmit={handleSubmit} 
+              className="space-y-6"
+            >
+              <input type="hidden" name="_subject" value={`Nouveau message de ${formData.companyName || formData.name}`} />
+              <input type="hidden" name="_captcha" value="false" />
+              <input type="hidden" name="_next" value={nextUrl} />
+              <input type="hidden" name="_autoresponse" value="Merci pour votre message ! Nous avons bien reçu votre demande et notre équipe vous recontactera dans les plus brefs délais." />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Nom complet</label>
-                    <input
-                      type="text"
-                      name="name"
-                      id="name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      className={`w-full px-4 py-3 bg-white text-gray-900 border rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition placeholder-gray-500 ${errors.name ? 'border-red-500' : 'border-gray-300'}`}
-                      placeholder="Votre nom"
-                    />
-                    {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
-                  </div>
-                  <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Adresse e-mail</label>
-                    <input
-                      type="email"
-                      name="email"
-                      id="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      className={`w-full px-4 py-3 bg-white text-gray-900 border rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition placeholder-gray-500 ${errors.email ? 'border-red-500' : 'border-gray-300'}`}
-                      placeholder="Votre e-mail"
-                    />
-                    {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
-                  </div>
-                </div>
-                
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label htmlFor="companyName" className="block text-sm font-medium text-gray-700 mb-1">Nom d'établissement ou d'entreprise</label>
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Nom complet</label>
                   <input
                     type="text"
-                    name="companyName"
-                    id="companyName"
-                    value={formData.companyName}
+                    name="name"
+                    id="name"
+                    value={formData.name}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition placeholder-gray-500"
-                    placeholder="Ex: Hôtel Le Grand Panorama"
+                    className={`w-full px-4 py-3 bg-white text-gray-900 border rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition placeholder-gray-500 ${errors.name ? 'border-red-500' : 'border-gray-300'}`}
+                    placeholder="Votre nom"
                   />
+                  {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
                 </div>
-
                 <div>
-                  <label htmlFor="attachment" className="block text-sm font-medium text-gray-700 mb-1">Joindre un document (brief, cahier des charges...)</label>
-                  {!file ? (
-                    <div
-                      onDragEnter={handleDrag}
-                      onDragLeave={handleDrag}
-                      onDragOver={handleDrag}
-                      onDrop={handleDrop}
-                      onClick={() => fileInputRef.current?.click()}
-                      className={`flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-white hover:bg-gray-100 transition ${isDragging ? 'border-brand-green-500' : ''}`}
-                    >
-                      <UploadIcon />
-                      <p className="mb-2 text-sm text-gray-500"><span className="font-semibold">Cliquez pour téléverser</span> ou glissez-déposez</p>
-                      <p className="text-xs text-gray-500">PDF, DOCX, PNG, JPG (MAX. 5MB)</p>
-                      <input id="attachment" name="attachment" ref={fileInputRef} type="file" className="hidden" onChange={handleFileChange} />
-                    </div>
-                  ) : (
-                    <div className="mt-2 flex items-center justify-between bg-gray-100 border border-gray-200 text-gray-700 px-4 py-2 rounded-lg">
-                      <span className="truncate max-w-xs sm:max-w-sm md:max-w-md">{file.name}</span>
-                      <button type="button" onClick={removeFile} className="ml-4 text-sm font-semibold text-red-600 hover:text-red-800 transition-colors">
-                        Supprimer
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">Votre message</label>
-                  <textarea
-                    name="message"
-                    id="message"
-                    rows={5}
-                    value={formData.message}
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Adresse e-mail</label>
+                  <input
+                    type="email"
+                    name="email"
+                    id="email"
+                    value={formData.email}
                     onChange={handleChange}
-                    className={`w-full px-4 py-3 bg-white text-gray-900 border rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition placeholder-gray-500 ${errors.message ? 'border-red-500' : 'border-gray-300'}`}
-                    placeholder="Parlez-nous de votre projet..."
-                  ></textarea>
-                  {errors.message && <p className="text-red-500 text-xs mt-1">{errors.message}</p>}
+                    className={`w-full px-4 py-3 bg-white text-gray-900 border rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition placeholder-gray-500 ${errors.email ? 'border-red-500' : 'border-gray-300'}`}
+                    placeholder="Votre e-mail"
+                  />
+                  {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
                 </div>
-                <div className="text-center">
-                  <button
-                    type="submit"
-                    disabled={submissionStatus === 'submitting'}
-                    className="bg-brand-green-600 text-white font-bold py-3 px-10 rounded-full text-lg hover:bg-brand-green-700 transition-all duration-300 transform hover:scale-105 active:scale-100 shadow-lg disabled:bg-brand-green-400 disabled:cursor-not-allowed disabled:scale-100"
+              </div>
+              
+              <div>
+                <label htmlFor="companyName" className="block text-sm font-medium text-gray-700 mb-1">Nom d'établissement ou d'entreprise</label>
+                <input
+                  type="text"
+                  name="companyName"
+                  id="companyName"
+                  value={formData.companyName}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition placeholder-gray-500"
+                  placeholder="Ex: Hôtel Le Grand Panorama"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="attachment" className="block text-sm font-medium text-gray-700 mb-1">Joindre un document (brief, cahier des charges...)</label>
+                {!file ? (
+                  <div
+                    onDragEnter={handleDrag}
+                    onDragLeave={handleDrag}
+                    onDragOver={handleDrag}
+                    onDrop={handleDrop}
+                    onClick={() => fileInputRef.current?.click()}
+                    className={`flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-white hover:bg-gray-100 transition ${isDragging ? 'border-brand-green-500' : ''}`}
                   >
-                    {submissionStatus === 'submitting' ? 'Envoi en cours...' : 'Envoyer le Message'}
-                  </button>
-                </div>
-              </form>
-            </>
+                    <UploadIcon />
+                    <p className="mb-2 text-sm text-gray-500"><span className="font-semibold">Cliquez pour téléverser</span> ou glissez-déposez</p>
+                    <p className="text-xs text-gray-500">PDF, DOCX, PNG, JPG (MAX. 5MB)</p>
+                    <input id="attachment" name="attachment" ref={fileInputRef} type="file" className="hidden" onChange={handleFileChange} />
+                  </div>
+                ) : (
+                  <div className="mt-2 flex items-center justify-between bg-gray-100 border border-gray-200 text-gray-700 px-4 py-2 rounded-lg">
+                    <span className="truncate max-w-xs sm:max-w-sm md:max-w-md">{file.name}</span>
+                    <button type="button" onClick={removeFile} className="ml-4 text-sm font-semibold text-red-600 hover:text-red-800 transition-colors">
+                      Supprimer
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">Votre message</label>
+                <textarea
+                  name="message"
+                  id="message"
+                  rows={5}
+                  value={formData.message}
+                  onChange={handleChange}
+                  className={`w-full px-4 py-3 bg-white text-gray-900 border rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition placeholder-gray-500 ${errors.message ? 'border-red-500' : 'border-gray-300'}`}
+                  placeholder="Parlez-nous de votre projet..."
+                ></textarea>
+                {errors.message && <p className="text-red-500 text-xs mt-1">{errors.message}</p>}
+              </div>
+              <div className="text-center">
+                <button
+                  type="submit"
+                  className="bg-brand-green-600 text-white font-bold py-3 px-10 rounded-full text-lg hover:bg-brand-green-700 transition-all duration-300 transform hover:scale-105 active:scale-100 shadow-lg"
+                >
+                  Envoyer le Message
+                </button>
+              </div>
+            </form>
           )}
         </div>
       </div>

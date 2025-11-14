@@ -1,86 +1,29 @@
-import React, { useEffect, useRef, useState } from 'react';
 
-interface PortfolioItemProps {
-  imageSrc: string;
-  category: string;
-  title: string;
-  index: number;
+import React from 'react';
+
+interface PortfolioProps {
+  setContactMessage: (message: string) => void;
 }
 
-const PortfolioItem: React.FC<PortfolioItemProps> = ({ imageSrc, category, title, index }) => {
-  const [isVisible, setIsVisible] = useState(false);
-  const itemRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    if (itemRef.current) {
-      observer.observe(itemRef.current);
-    }
-
-    return () => {
-      if(itemRef.current) {
-        observer.unobserve(itemRef.current)
-      }
-    };
-  }, []);
-  
+const PortfolioItem: React.FC<{ imageSrc: string; title: string; }> = ({ imageSrc, title }) => {
   return (
-    <div 
-      ref={itemRef}
-      className={`group relative overflow-hidden rounded-lg shadow-lg transition-all duration-500 transform ${
-        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-      }`}
-      style={{ transitionDelay: `${index * 100}ms` }}
-    >
-      <img src={imageSrc} alt={title} className="w-full h-full object-cover transition-transform duration-500 ease-in-out group-hover:scale-110" />
-      
-      {/* Base gradient */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-      
-      {/* Darkening overlay on hover to make text pop */}
-      <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-40 transition-opacity duration-300 ease-in-out"></div>
-
-      {/* Text container shifts up and becomes more prominent on hover */}
-      <div className="absolute bottom-0 left-0 p-6 text-white w-full transition-transform duration-300 ease-in-out group-hover:-translate-y-2">
-        <span className="text-sm font-semibold text-brand-green-400 uppercase tracking-wider">{category}</span>
-        <h3 className="text-2xl font-bold mt-1 transition-transform duration-300 ease-in-out group-hover:scale-105 origin-bottom-left">{title}</h3>
-      </div>
+    <div className="relative overflow-hidden rounded-lg shadow-lg">
+      <img src={imageSrc} alt={title} loading="lazy" className="w-full h-full object-cover" />
     </div>
   );
 };
 
-const Portfolio: React.FC = () => {
+const Portfolio: React.FC<PortfolioProps> = ({ setContactMessage }) => {
   const projects = [
-    {
-      imageSrc: 'https://picsum.photos/800/600?random=2',
-      category: 'Hôtel de Luxe',
-      title: 'Paradise Resort',
-    },
-    {
-      imageSrc: 'https://picsum.photos/800/600?random=3',
-      category: 'Aventure',
-      title: 'Alpine Adventures',
-    },
-    {
-      imageSrc: 'https://picsum.photos/800/600?random=4',
-      category: 'Tourisme Urbain',
-      title: 'City Explorer Tours',
-    },
-    {
-      imageSrc: 'https://picsum.photos/800/600?random=5',
-      category: 'Bien-être',
-      title: 'Serenity Spa & Retreat',
-    },
+    { imageSrc: 'https://picsum.photos/800/600?random=2' },
+    { imageSrc: 'https://picsum.photos/800/600?random=3' },
+    { imageSrc: 'https://picsum.photos/800/600?random=4' },
+    { imageSrc: 'https://picsum.photos/800/600?random=5' },
   ];
+
+  const handleViewPortfolioClick = () => {
+    setContactMessage("Bonjour, je suis intéressé(e) et je souhaiterais voir votre portfolio complet.");
+  };
 
   return (
     <section id="portfolio" className="py-20 bg-white">
@@ -91,10 +34,25 @@ const Portfolio: React.FC = () => {
             Découvrez comment nous avons aidé nos clients à atteindre leurs objectifs.
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {projects.map((project, index) => (
-            <PortfolioItem key={index} {...project} index={index} />
-          ))}
+        <div className="relative">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 filter blur-md brightness-75">
+            {projects.map((project, index) => (
+              <PortfolioItem key={index} {...project} title={`Portfolio item ${index + 1}`} />
+            ))}
+          </div>
+          <div className="absolute inset-0 bg-black/50 rounded-xl flex flex-col items-center justify-center text-center text-white p-8">
+            <h3 className="text-2xl md:text-4xl font-bold mb-4 drop-shadow-lg">Débloquez l'accès à nos réalisations</h3>
+            <p className="mb-8 max-w-lg text-lg text-gray-200 drop-shadow-md">
+              Laissez-nous vos coordonnées pour découvrir en détail comment nous transformons les marques de nos clients.
+            </p>
+            <a 
+              href="#contact" 
+              onClick={handleViewPortfolioClick} 
+              className="bg-brand-green-600 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-brand-green-700 transition-all duration-300 transform hover:scale-110 active:scale-105 shadow-lg"
+            >
+              Voir notre portfolio
+            </a>
+          </div>
         </div>
       </div>
     </section>

@@ -38,15 +38,17 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({ quote, author, title,
     return (
         <div 
             ref={cardRef}
-            className={`bg-white p-8 rounded-xl shadow-lg border border-gray-100 flex flex-col items-center text-center transition-all duration-500 transform ${
+            className={`bg-white p-8 rounded-xl shadow-lg border border-gray-100 flex flex-col items-center text-center transition-all duration-500 transform h-full ${
                 isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
             }`}
             style={{ transitionDelay: `${index * 100}ms` }}
         >
-            <img src={avatarSrc} alt={author} className="w-20 h-20 rounded-full mb-6 object-cover" />
-            <p className="text-gray-600 italic mb-6 text-lg">"{quote}"</p>
-            <div className="font-bold text-gray-900">{author}</div>
-            <div className="text-sm text-brand-green-600">{title}</div>
+            <img src={avatarSrc} alt={author} loading="lazy" className="w-20 h-20 rounded-full mb-6 object-cover flex-shrink-0" />
+            <div className="flex flex-col flex-grow justify-center">
+              <p className="text-gray-600 italic mb-6 text-lg">"{quote}"</p>
+              <div className="font-bold text-gray-900">{author}</div>
+              <div className="text-sm text-brand-green-600">{title}</div>
+            </div>
         </div>
     );
 };
@@ -55,17 +57,29 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({ quote, author, title,
 const Testimonials: React.FC = () => {
   const testimonials = [
     {
-      quote: "Telya Agency a transformé notre présence en ligne. Nos réservations ont augmenté de 40% en seulement six mois. Une équipe incroyable et dévouée !",
-      author: 'Sophie Dubois',
-      title: 'Directrice, Hôtel Le Grand Panorama',
-      avatarSrc: 'https://picsum.photos/200/200?random=6'
+      quote: "Leur stratégie de contenu et leurs visuels sur Instagram ont attiré une nouvelle clientèle. Nos réservations directes ont grimpé de 35% !",
+      author: 'Sarah Chen',
+      title: 'Gérante, Riad Al Mamoun, Marrakech',
+      avatarSrc: 'https://i.pravatar.cc/150?u=sarahchen'
     },
     {
-      quote: "Leur expertise dans le secteur du tourisme est inégalée. Ils comprennent nos défis et livrent des résultats concrets. Je les recommande vivement.",
-      author: 'Marc Lefebvre',
-      title: 'Fondateur, Aventures Nomades',
-      avatarSrc: 'https://picsum.photos/200/200?random=7'
+      quote: "Le nouveau design de nos menus et nos affiches sont superbes. Telya Agency a donné un vrai coup de jeune à notre image de marque. Très professionnels.",
+      author: 'Julien Moreau',
+      title: 'Propriétaire, Restaurant Le Panoramique',
+      avatarSrc: 'https://i.pravatar.cc/150?u=julienmoreau'
     },
+    {
+        quote: "Les vidéos Reels pour nos excursions dans le désert sont devenues virales ! Une visibilité inespérée qui a boosté notre activité de manière spectaculaire.",
+        author: 'Fatima Zahra',
+        title: 'Fondatrice, Atlas Excursions',
+        avatarSrc: 'https://i.pravatar.cc/150?u=fatimazahra'
+    },
+    {
+        quote: "L'audit stratégique a été une révélation. Leur compréhension du marché du luxe nous a permis de redéfinir notre positionnement digital.",
+        author: 'David Lemoine',
+        title: 'Directeur Marketing, Groupe Hôtelier "Évasion"',
+        avatarSrc: 'https://i.pravatar.cc/150?u=davidlemoine'
+    }
   ];
 
   return (
@@ -77,7 +91,7 @@ const Testimonials: React.FC = () => {
             La confiance de nos partenaires est notre plus grande fierté.
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {testimonials.map((testimonial, index) => (
                 <TestimonialCard key={index} {...testimonial} index={index} />
             ))}

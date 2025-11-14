@@ -67,7 +67,12 @@ const Header: React.FC = () => {
               Commençons
             </a>
           )}
-          <button className={`md:hidden transition-colors ${isScrolled ? 'text-gray-900' : 'text-white [filter:drop-shadow(0_1px_1px_rgba(0,0,0,0.7))]'}`} onClick={() => setIsMenuOpen(!isMenuOpen)}>
+          <button 
+            className={`md:hidden transition-colors ${isScrolled ? 'text-gray-900' : 'text-white [filter:drop-shadow(0_1px_1px_rgba(0,0,0,0.7))]'}`} 
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label={isMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}
+            aria-expanded={isMenuOpen}
+          >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={isMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}></path>
             </svg>
