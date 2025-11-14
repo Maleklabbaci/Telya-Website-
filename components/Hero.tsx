@@ -11,7 +11,7 @@ const Hero: React.FC = () => {
         loop
         muted
         playsInline
-        className="absolute z-0 w-auto min-w-full min-h-full max-w-none"
+        className="absolute z-0 w-auto min-w-full min-h-full max-w-none object-cover"
       >
         Votre navigateur ne supporte pas la balise vidéo.
       </video>
@@ -25,7 +25,7 @@ const Hero: React.FC = () => {
         </p>
         <a 
           href="#services"
-          className="bg-brand-green-600 text-white font-bold py-4 px-10 rounded-full text-lg hover:bg-brand-green-700 transition-all duration-300 transform hover:scale-110 shadow-lg"
+          className="bg-brand-green-600 text-white font-bold py-4 px-10 rounded-full text-lg hover:bg-brand-green-700 transition-all duration-300 transform hover:scale-110 active:scale-105 shadow-lg"
         >
           Découvrir Nos Services
         </a>

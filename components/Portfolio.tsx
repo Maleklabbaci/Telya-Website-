@@ -1,22 +1,56 @@
 
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface PortfolioItemProps {
   imageSrc: string;
   category: string;
   title: string;
+  index: number;
 }
 
-const PortfolioItem: React.FC<PortfolioItemProps> = ({ imageSrc, category, title }) => (
-  <div className="group relative overflow-hidden rounded-lg shadow-lg">
-    <img src={imageSrc} alt={title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-    <div className="absolute bottom-0 left-0 p-6 text-white">
-      <span className="text-sm font-semibold text-brand-green-400 uppercase tracking-wider">{category}</span>
-      <h3 className="text-2xl font-bold mt-1">{title}</h3>
+const PortfolioItem: React.FC<PortfolioItemProps> = ({ imageSrc, category, title, index }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const itemRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (itemRef.current) {
+      observer.observe(itemRef.current);
+    }
+
+    return () => {
+      if(itemRef.current) {
+        observer.unobserve(itemRef.current)
+      }
+    };
+  }, []);
+  
+  return (
+    <div 
+      ref={itemRef}
+      className={`group relative overflow-hidden rounded-lg shadow-lg transition-all duration-500 transform ${
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+      }`}
+      style={{ transitionDelay: `${index * 100}ms` }}
+    >
+      <img src={imageSrc} alt={title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+      <div className="absolute bottom-0 left-0 p-6 text-white">
+        <span className="text-sm font-semibold text-brand-green-400 uppercase tracking-wider">{category}</span>
+        <h3 className="text-2xl font-bold mt-1">{title}</h3>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const Portfolio: React.FC = () => {
   const projects = [
@@ -53,7 +87,7 @@ const Portfolio: React.FC = () => {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {projects.map((project, index) => (
-            <PortfolioItem key={index} {...project} />
+            <PortfolioItem key={index} {...project} index={index} />
           ))}
         </div>
       </div>

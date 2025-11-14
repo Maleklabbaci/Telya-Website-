@@ -1,22 +1,56 @@
 
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { SeoIcon, SocialMediaIcon, ContentIcon, PpcIcon } from './icons';
 
 interface ServiceCardProps {
   icon: React.ReactNode;
   title: string;
   description: string;
+  index: number;
 }
 
-const ServiceCard: React.FC<ServiceCardProps> = ({ icon, title, description }) => (
-  <div className="bg-white p-8 rounded-xl shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-gray-100 flex flex-col items-center text-center">
-    <div className="bg-brand-green-100 text-brand-green-700 rounded-full p-4 mb-6">
-      {icon}
+const ServiceCard: React.FC<ServiceCardProps> = ({ icon, title, description, index }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (cardRef.current) {
+      observer.observe(cardRef.current);
+    }
+
+    return () => {
+      if(cardRef.current) {
+        observer.unobserve(cardRef.current)
+      }
+    };
+  }, []);
+
+  return (
+    <div
+      ref={cardRef}
+      className={`bg-white p-8 rounded-xl shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 border border-gray-100 flex flex-col items-center text-center transform ${
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+      }`}
+      style={{ transitionDelay: `${index * 100}ms` }}
+    >
+      <div className="bg-brand-green-100 text-brand-green-700 rounded-full p-4 mb-6">
+        {icon}
+      </div>
+      <h3 className="text-2xl font-bold text-gray-900 mb-3">{title}</h3>
+      <p className="text-gray-600 leading-relaxed">{description}</p>
     </div>
-    <h3 className="text-2xl font-bold text-gray-900 mb-3">{title}</h3>
-    <p className="text-gray-600 leading-relaxed">{description}</p>
-  </div>
-);
+  );
+};
 
 const Services: React.FC = () => {
   const services = [
@@ -53,7 +87,7 @@ const Services: React.FC = () => {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {services.map((service, index) => (
-            <ServiceCard key={index} {...service} />
+            <ServiceCard key={index} {...service} index={index} />
           ))}
         </div>
       </div>

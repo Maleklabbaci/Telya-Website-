@@ -1,19 +1,134 @@
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
-import React, { useState } from 'react';
+const UploadIcon: React.FC = () => (
+    <svg className="w-8 h-8 mb-3 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
+    </svg>
+);
+
+const CloseIcon: React.FC = () => (
+    <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+    </svg>
+);
 
 const Contact: React.FC = () => {
-  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    companyName: '',
+    message: '',
+  });
+  const [file, setFile] = useState<File | null>(null);
+  const [errors, setErrors] = useState<{ name?: string; email?: string; message?: string }>({});
+  const [isDragging, setIsDragging] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const formContainerRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    const currentRef = formContainerRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    // Clear validation error when user starts typing
+    if (errors[name as keyof typeof errors]) {
+      setErrors({ ...errors, [name]: undefined });
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setFile(e.target.files[0]);
+    }
+  };
+
+  const handleDrag = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === 'dragenter' || e.type === 'dragover') {
+      setIsDragging(true);
+    } else if (e.type === 'dragleave') {
+      setIsDragging(false);
+    }
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      setFile(e.dataTransfer.files[0]);
+      if (fileInputRef.current) {
+        fileInputRef.current.files = e.dataTransfer.files;
+      }
+    }
+  }, []);
+
+  const removeFile = () => {
+    setFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically handle form submission, e.g., send to an API
-    console.log('Form submitted:', formData);
-    setIsSubmitted(true);
+    const newErrors: { name?: string; email?: string; message?: string } = {};
+
+    if (!formData.name.trim()) newErrors.name = "Le nom complet est requis.";
+    if (!formData.email.trim()) {
+        newErrors.email = "L'adresse e-mail est requise.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+        newErrors.email = "L'adresse e-mail n'est pas valide.";
+    }
+    if (!formData.message.trim()) newErrors.message = "Votre message est requis.";
+
+    if (Object.keys(newErrors).length > 0) {
+        setErrors(newErrors);
+        return;
+    }
+    
+    setErrors({});
+
+    const subject = `Prise de contact de ${formData.companyName || formData.name}`;
+    let body = `
+Nom: ${formData.name}
+Email: ${formData.email}
+Établissement / Entreprise: ${formData.companyName || 'Non spécifié'}
+
+Message:
+${formData.message}
+    `;
+
+    if (file) {
+        body += `\n\n---
+Note: Un fichier (${file.name}) a été sélectionné. Veuillez l'inviter à joindre manuellement ce document à l'e-mail.`;
+    }
+
+    const mailtoLink = `mailto:telyaagency@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailtoLink;
   };
 
   return (
@@ -25,66 +140,104 @@ const Contact: React.FC = () => {
             Contactez-nous pour discuter de votre projet et obtenir une consultation gratuite.
           </p>
         </div>
-        
-        <div className="max-w-4xl mx-auto bg-gray-50 p-8 md:p-12 rounded-xl shadow-lg border border-gray-100">
-          {isSubmitted ? (
-            <div className="text-center p-8">
-              <h3 className="text-2xl font-bold text-brand-green-700 mb-2">Merci !</h3>
-              <p className="text-gray-700">Votre message a bien été envoyé. Nous vous répondrons dans les plus brefs délais.</p>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Nom complet</label>
-                  <input
-                    type="text"
-                    name="name"
-                    id="name"
-                    required
-                    value={formData.name}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition"
-                    placeholder="Votre nom"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Adresse e-mail</label>
-                  <input
-                    type="email"
-                    name="email"
-                    id="email"
-                    required
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition"
-                    placeholder="Votre e-mail"
-                  />
-                </div>
+
+        <div
+          ref={formContainerRef}
+          className={`max-w-4xl mx-auto bg-gray-50 p-8 md:p-12 rounded-xl shadow-lg border border-gray-100 transition-all duration-700 transform ${
+            isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+          }`}
+        >
+          <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Nom complet</label>
+                <input
+                  type="text"
+                  name="name"
+                  id="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition ${errors.name ? 'border-red-500' : 'border-gray-300'}`}
+                  placeholder="Votre nom"
+                />
+                {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
               </div>
               <div>
-                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">Votre message</label>
-                <textarea
-                  name="message"
-                  id="message"
-                  required
-                  rows={5}
-                  value={formData.message}
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Adresse e-mail</label>
+                <input
+                  type="email"
+                  name="email"
+                  id="email"
+                  value={formData.email}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition"
-                  placeholder="Parlez-nous de votre projet..."
-                ></textarea>
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition ${errors.email ? 'border-red-500' : 'border-gray-300'}`}
+                  placeholder="Votre e-mail"
+                />
+                {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
               </div>
-              <div className="text-center">
-                <button
-                  type="submit"
-                  className="bg-brand-green-600 text-white font-bold py-3 px-10 rounded-full text-lg hover:bg-brand-green-700 transition-all duration-300 transform hover:scale-105 shadow-lg"
+            </div>
+            
+            <div>
+              <label htmlFor="companyName" className="block text-sm font-medium text-gray-700 mb-1">Nom d'établissement ou d'entreprise</label>
+              <input
+                type="text"
+                name="companyName"
+                id="companyName"
+                value={formData.companyName}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition"
+                placeholder="Ex: Hôtel Le Grand Panorama"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="file-upload" className="block text-sm font-medium text-gray-700 mb-1">Joindre un document (brief, cahier des charges...)</label>
+              {!file ? (
+                <div
+                  onDragEnter={handleDrag}
+                  onDragLeave={handleDrag}
+                  onDragOver={handleDrag}
+                  onDrop={handleDrop}
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition ${isDragging ? 'border-brand-green-500' : ''}`}
                 >
-                  Envoyer le Message
-                </button>
-              </div>
-            </form>
-          )}
+                  <UploadIcon />
+                  <p className="mb-2 text-sm text-gray-500"><span className="font-semibold">Cliquez pour téléverser</span> ou glissez-déposez</p>
+                  <p className="text-xs text-gray-500">PDF, DOCX, PNG, JPG (MAX. 5MB)</p>
+                  <input id="file-upload" name="file" ref={fileInputRef} type="file" className="hidden" onChange={handleFileChange} />
+                </div>
+              ) : (
+                <div className="mt-2 flex items-center justify-between bg-gray-100 border border-gray-200 text-gray-700 px-4 py-2 rounded-lg">
+                  <span className="truncate max-w-xs sm:max-w-sm md:max-w-md">{file.name}</span>
+                  <button type="button" onClick={removeFile} className="ml-4 p-1 rounded-full hover:bg-gray-200 text-gray-500 hover:text-gray-800 transition">
+                    <CloseIcon />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">Votre message</label>
+              <textarea
+                name="message"
+                id="message"
+                rows={5}
+                value={formData.message}
+                onChange={handleChange}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition ${errors.message ? 'border-red-500' : 'border-gray-300'}`}
+                placeholder="Parlez-nous de votre projet..."
+              ></textarea>
+              {errors.message && <p className="text-red-500 text-xs mt-1">{errors.message}</p>}
+            </div>
+            <div className="text-center">
+              <button
+                type="submit"
+                className="bg-brand-green-600 text-white font-bold py-3 px-10 rounded-full text-lg hover:bg-brand-green-700 transition-all duration-300 transform hover:scale-105 active:scale-100 shadow-lg"
+              >
+                Envoyer le Message
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </section>
