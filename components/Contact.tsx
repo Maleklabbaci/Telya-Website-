@@ -6,12 +6,6 @@ const UploadIcon: React.FC = () => (
     </svg>
 );
 
-const CloseIcon: React.FC = () => (
-    <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-    </svg>
-);
-
 const Contact: React.FC = () => {
   const [formData, setFormData] = useState({
     name: '',
@@ -128,7 +122,13 @@ Note: Un fichier (${file.name}) a été sélectionné. Veuillez l'inviter à joi
     }
 
     const mailtoLink = `mailto:telyaagency@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.location.href = mailtoLink;
+    
+    // Using a temporary anchor element for better reliability
+    const link = document.createElement('a');
+    link.href = mailtoLink;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -209,8 +209,8 @@ Note: Un fichier (${file.name}) a été sélectionné. Veuillez l'inviter à joi
               ) : (
                 <div className="mt-2 flex items-center justify-between bg-gray-100 border border-gray-200 text-gray-700 px-4 py-2 rounded-lg">
                   <span className="truncate max-w-xs sm:max-w-sm md:max-w-md">{file.name}</span>
-                  <button type="button" onClick={removeFile} className="ml-4 p-1 rounded-full hover:bg-gray-200 text-gray-500 hover:text-gray-800 transition">
-                    <CloseIcon />
+                  <button type="button" onClick={removeFile} className="ml-4 text-sm font-semibold text-red-600 hover:text-red-800 transition-colors">
+                    Supprimer
                   </button>
                 </div>
               )}

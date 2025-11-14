@@ -14,7 +14,7 @@ const Footer: React.FC = () => {
         <div className="flex flex-col md:flex-row justify-between items-center text-center md:text-left">
           <div className="mb-6 md:mb-0">
              <a href="#home" className="flex justify-center md:justify-start">
-                 <TelyaLogo className="h-12 w-auto" />
+                 <TelyaLogo className="text-3xl font-extrabold" />
               </a>
             <p className="mt-4 text-gray-400 max-w-sm mx-auto md:mx-0">Le marketing digital qui donne vie à vos destinations.</p>
           </div>
