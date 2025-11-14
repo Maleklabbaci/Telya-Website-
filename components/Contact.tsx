@@ -157,7 +157,7 @@ Note: Un fichier (${file.name}) a été sélectionné. Veuillez l'inviter à joi
                   id="name"
                   value={formData.name}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition ${errors.name ? 'border-red-500' : 'border-gray-300'}`}
+                  className={`w-full px-4 py-3 bg-gray-800 text-white border rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition placeholder-gray-400 ${errors.name ? 'border-red-500' : 'border-gray-600'}`}
                   placeholder="Votre nom"
                 />
                 {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
@@ -170,7 +170,7 @@ Note: Un fichier (${file.name}) a été sélectionné. Veuillez l'inviter à joi
                   id="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition ${errors.email ? 'border-red-500' : 'border-gray-300'}`}
+                  className={`w-full px-4 py-3 bg-gray-800 text-white border rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition placeholder-gray-400 ${errors.email ? 'border-red-500' : 'border-gray-600'}`}
                   placeholder="Votre e-mail"
                 />
                 {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
@@ -185,7 +185,7 @@ Note: Un fichier (${file.name}) a été sélectionné. Veuillez l'inviter à joi
                 id="companyName"
                 value={formData.companyName}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition"
+                className="w-full px-4 py-3 bg-gray-800 text-white border border-gray-600 rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition placeholder-gray-400"
                 placeholder="Ex: Hôtel Le Grand Panorama"
               />
             </div>
@@ -224,7 +224,7 @@ Note: Un fichier (${file.name}) a été sélectionné. Veuillez l'inviter à joi
                 rows={5}
                 value={formData.message}
                 onChange={handleChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition ${errors.message ? 'border-red-500' : 'border-gray-300'}`}
+                className={`w-full px-4 py-3 bg-gray-800 text-white border rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition placeholder-gray-400 ${errors.message ? 'border-red-500' : 'border-gray-600'}`}
                 placeholder="Parlez-nous de votre projet..."
               ></textarea>
               {errors.message && <p className="text-red-500 text-xs mt-1">{errors.message}</p>}
