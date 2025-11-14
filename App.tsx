@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import Services from './components/Services';
@@ -7,8 +7,10 @@ import Portfolio from './components/Portfolio';
 import Testimonials from './components/Testimonials';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
+import AdminLoginPage from './pages/AdminLoginPage';
 
 const App: React.FC = () => {
+  const [route, setRoute] = useState(window.location.pathname);
 
   useEffect(() => {
     const handleSmoothScroll = (e: MouseEvent) => {
@@ -39,23 +41,41 @@ const App: React.FC = () => {
     };
 
     document.addEventListener('click', handleSmoothScroll);
+    
+    const onLocationChange = () => {
+      setRoute(window.location.pathname);
+    };
+    window.addEventListener('popstate', onLocationChange);
+
+
     return () => {
       document.removeEventListener('click', handleSmoothScroll);
+      window.removeEventListener('popstate', onLocationChange);
     };
   }, []);
 
+  const renderContent = () => {
+    if (route === '/admin') {
+      return <AdminLoginPage />;
+    }
+    return (
+      <>
+        <Header />
+        <main>
+          <Hero />
+          <Services />
+          <Portfolio />
+          <Testimonials />
+          <Contact />
+        </main>
+        <Footer />
+      </>
+    );
+  };
 
   return (
     <div className="bg-white text-gray-800 font-sans">
-      <Header />
-      <main>
-        <Hero />
-        <Services />
-        <Portfolio />
-        <Testimonials />
-        <Contact />
-      </main>
-      <Footer />
+      {renderContent()}
     </div>
   );
 };
