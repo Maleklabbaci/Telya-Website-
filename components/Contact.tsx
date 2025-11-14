@@ -7,12 +7,7 @@ const UploadIcon: React.FC = () => (
     </svg>
 );
 
-interface ContactProps {
-  contactMessage: string;
-  setContactMessage: (message: string) => void;
-}
-
-const Contact: React.FC<ContactProps> = ({ contactMessage, setContactMessage }) => {
+const Contact: React.FC = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -23,8 +18,10 @@ const Contact: React.FC<ContactProps> = ({ contactMessage, setContactMessage }) 
   const [errors, setErrors] = useState<{ name?: string; email?: string; message?: string }>({});
   const [isDragging, setIsDragging] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [headerVisible, setHeaderVisible] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const formContainerRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -37,33 +34,37 @@ const Contact: React.FC<ContactProps> = ({ contactMessage, setContactMessage }) 
       }
     }
   }, []);
-  
-  useEffect(() => {
-    if (contactMessage) {
-        setFormData(prev => ({ ...prev, message: contactMessage }));
-    }
-  }, [contactMessage]);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
+    const formObserver = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           setIsVisible(true);
-          observer.disconnect();
+          formObserver.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+    
+    const headerObserver = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setHeaderVisible(true);
+          headerObserver.disconnect();
         }
       },
       { threshold: 0.1 }
     );
 
-    const currentRef = formContainerRef.current;
-    if (currentRef) {
-      observer.observe(currentRef);
-    }
+    const currentFormRef = formContainerRef.current;
+    if (currentFormRef) formObserver.observe(currentFormRef);
+    
+    const currentHeaderRef = headerRef.current;
+    if (currentHeaderRef) headerObserver.observe(currentHeaderRef);
 
     return () => {
-      if (currentRef) {
-        observer.unobserve(currentRef);
-      }
+      if (currentFormRef) formObserver.unobserve(currentFormRef);
+      if (currentHeaderRef) headerObserver.unobserve(currentHeaderRef);
     };
   }, []);
 
@@ -118,7 +119,6 @@ const Contact: React.FC<ContactProps> = ({ contactMessage, setContactMessage }) 
       fileInputRef.current.value = '';
     }
     setShowSuccessMessage(false);
-    setContactMessage('');
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -147,8 +147,8 @@ const Contact: React.FC<ContactProps> = ({ contactMessage, setContactMessage }) 
   return (
     <section id="contact" className="py-20 bg-white">
       <div className="container mx-auto px-6">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900">Prêt à Décoller ?</h2>
+        <div ref={headerRef} className={`text-center mb-16 transition-opacity duration-1000 ease-out transform ${headerVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900">Boostez vos réservations dès aujourd’hui</h2>
           <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
             Contactez-nous pour discuter de votre projet et obtenir une consultation gratuite.
           </p>
@@ -168,7 +168,7 @@ const Contact: React.FC<ContactProps> = ({ contactMessage, setContactMessage }) 
               </p>
               <button
                 onClick={resetForm}
-                className="bg-brand-green-600 text-white font-bold py-3 px-10 rounded-full text-lg hover:bg-brand-green-700 transition-all duration-300 transform hover:scale-105 active:scale-100 shadow-lg"
+                className="bg-brand-green-600 text-white font-bold py-3 px-10 rounded-full text-lg hover:bg-brand-green-700 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg"
               >
                 Envoyer un autre message
               </button>
@@ -196,7 +196,7 @@ const Contact: React.FC<ContactProps> = ({ contactMessage, setContactMessage }) 
                     id="name"
                     value={formData.name}
                     onChange={handleChange}
-                    className={`w-full px-4 py-3 bg-white text-gray-900 border rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition placeholder-gray-500 ${errors.name ? 'border-red-500' : 'border-gray-300'}`}
+                    className={`w-full px-4 py-3 bg-white text-gray-900 border rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition-colors placeholder-gray-500 ${errors.name ? 'border-red-500' : 'border-gray-300'}`}
                     placeholder="Votre nom"
                   />
                   {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
@@ -209,7 +209,7 @@ const Contact: React.FC<ContactProps> = ({ contactMessage, setContactMessage }) 
                     id="email"
                     value={formData.email}
                     onChange={handleChange}
-                    className={`w-full px-4 py-3 bg-white text-gray-900 border rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition placeholder-gray-500 ${errors.email ? 'border-red-500' : 'border-gray-300'}`}
+                    className={`w-full px-4 py-3 bg-white text-gray-900 border rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition-colors placeholder-gray-500 ${errors.email ? 'border-red-500' : 'border-gray-300'}`}
                     placeholder="Votre e-mail"
                   />
                   {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
@@ -217,14 +217,14 @@ const Contact: React.FC<ContactProps> = ({ contactMessage, setContactMessage }) 
               </div>
               
               <div>
-                <label htmlFor="companyName" className="block text-sm font-medium text-gray-700 mb-1">Nom d'établissement ou d'entreprise</label>
+                <label htmlFor="companyName" className="block text-sm font-medium text-gray-700 mb-1">Nom de votre établissement (Hôtel, Restaurant, Agence…)</label>
                 <input
                   type="text"
                   name="companyName"
                   id="companyName"
                   value={formData.companyName}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition placeholder-gray-500"
+                  className="w-full px-4 py-3 bg-white text-gray-900 border border-gray-300 rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition-colors placeholder-gray-500"
                   placeholder="Ex: Hôtel Le Grand Panorama"
                 />
               </div>
@@ -238,7 +238,7 @@ const Contact: React.FC<ContactProps> = ({ contactMessage, setContactMessage }) 
                     onDragOver={handleDrag}
                     onDrop={handleDrop}
                     onClick={() => fileInputRef.current?.click()}
-                    className={`flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-white hover:bg-gray-100 transition ${isDragging ? 'border-brand-green-500' : ''}`}
+                    className={`flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-white hover:bg-gray-100 transition-colors ${isDragging ? 'border-brand-green-500' : ''}`}
                   >
                     <UploadIcon />
                     <p className="mb-2 text-sm text-gray-500"><span className="font-semibold">Cliquez pour téléverser</span> ou glissez-déposez</p>
@@ -263,15 +263,15 @@ const Contact: React.FC<ContactProps> = ({ contactMessage, setContactMessage }) 
                   rows={5}
                   value={formData.message}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 bg-white text-gray-900 border rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition placeholder-gray-500 ${errors.message ? 'border-red-500' : 'border-gray-300'}`}
-                  placeholder="Parlez-nous de votre projet..."
+                  className={`w-full px-4 py-3 bg-white text-gray-900 border rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition-colors placeholder-gray-500 ${errors.message ? 'border-red-500' : 'border-gray-300'}`}
+                  placeholder="Parlez-nous de votre établissement et de vos besoins (marketing, réseaux sociaux, shooting…)"
                 ></textarea>
                 {errors.message && <p className="text-red-500 text-xs mt-1">{errors.message}</p>}
               </div>
               <div className="text-center">
                 <button
                   type="submit"
-                  className="bg-brand-green-600 text-white font-bold py-3 px-10 rounded-full text-lg hover:bg-brand-green-700 transition-all duration-300 transform hover:scale-105 active:scale-100 shadow-lg"
+                  className="bg-brand-green-600 text-white font-bold py-3 px-10 rounded-full text-lg hover:bg-brand-green-700 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg"
                 >
                   Envoyer le Message
                 </button>

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { SocialMediaIcon, ContentIcon, DesignIcon, WebsiteSeoIcon, StrategyIcon, InfluencerIcon, DashboardIcon, VipBadgeIcon } from './icons';
 
@@ -52,6 +53,23 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ icon, title, description, ind
 };
 
 const Services: React.FC = () => {
+  const [headerVisible, setHeaderVisible] = useState(false);
+  const headerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setHeaderVisible(true);
+        observer.disconnect();
+      }
+    }, { threshold: 0.1 });
+
+    const currentRef = headerRef.current;
+    if (currentRef) observer.observe(currentRef);
+    
+    return () => { if(currentRef) observer.unobserve(currentRef) };
+  }, []);
+  
   const services = [
     {
       icon: <ContentIcon />,
@@ -98,7 +116,7 @@ const Services: React.FC = () => {
   return (
     <section id="services" className="py-20 bg-gray-50">
       <div className="container mx-auto px-6">
-        <div className="text-center mb-16">
+        <div ref={headerRef} className={`text-center mb-16 transition-opacity duration-1000 ease-out transform ${headerVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900">Nos Services</h2>
           <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
             Des stratégies sur mesure pour transformer votre présence en ligne et booster vos réservations.

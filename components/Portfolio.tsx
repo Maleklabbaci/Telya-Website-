@@ -1,9 +1,6 @@
 
-import React from 'react';
-
-interface PortfolioProps {
-  setContactMessage: (message: string) => void;
-}
+import React, { useState, useEffect, useRef } from 'react';
+import PortfolioModal from './PortfolioModal';
 
 const PortfolioItem: React.FC<{ imageSrc: string; title: string; }> = ({ imageSrc, title }) => {
   return (
@@ -13,7 +10,25 @@ const PortfolioItem: React.FC<{ imageSrc: string; title: string; }> = ({ imageSr
   );
 };
 
-const Portfolio: React.FC<PortfolioProps> = ({ setContactMessage }) => {
+const Portfolio: React.FC = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [headerVisible, setHeaderVisible] = useState(false);
+  const headerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setHeaderVisible(true);
+        observer.disconnect();
+      }
+    }, { threshold: 0.1 });
+
+    const currentRef = headerRef.current;
+    if (currentRef) observer.observe(currentRef);
+    
+    return () => { if(currentRef) observer.unobserve(currentRef) };
+  }, []);
+
   const projects = [
     { imageSrc: 'https://picsum.photos/800/600?random=2' },
     { imageSrc: 'https://picsum.photos/800/600?random=3' },
@@ -21,14 +36,10 @@ const Portfolio: React.FC<PortfolioProps> = ({ setContactMessage }) => {
     { imageSrc: 'https://picsum.photos/800/600?random=5' },
   ];
 
-  const handleViewPortfolioClick = () => {
-    setContactMessage("Bonjour, je suis intéressé(e) et je souhaiterais voir votre portfolio complet.");
-  };
-
   return (
     <section id="portfolio" className="py-20 bg-white">
       <div className="container mx-auto px-6">
-        <div className="text-center mb-16">
+        <div ref={headerRef} className={`text-center mb-16 transition-opacity duration-1000 ease-out transform ${headerVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900">Nos Réalisations</h2>
           <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
             Découvrez comment nous avons aidé nos clients à atteindre leurs objectifs.
@@ -45,16 +56,18 @@ const Portfolio: React.FC<PortfolioProps> = ({ setContactMessage }) => {
             <p className="mb-8 max-w-lg text-lg text-gray-200 drop-shadow-md">
               Laissez-nous vos coordonnées pour découvrir en détail comment nous transformons les marques de nos clients.
             </p>
-            <a 
-              href="#contact" 
-              onClick={handleViewPortfolioClick} 
-              className="bg-brand-green-600 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-brand-green-700 transition-all duration-300 transform hover:scale-110 active:scale-105 shadow-lg"
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="bg-brand-green-600 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-brand-green-700 transition-all duration-300 transform hover:scale-110 active:scale-105 shadow-lg hover:shadow-brand-green-700/40"
             >
               Voir notre portfolio
-            </a>
+            </button>
           </div>
         </div>
       </div>
+      {isModalOpen && (
+        <PortfolioModal onClose={() => setIsModalOpen(false)} />
+      )}
     </section>
   );
 };

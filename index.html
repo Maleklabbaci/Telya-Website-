@@ -1,6 +1,6 @@
 
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" style="scroll-behavior: smooth;">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
@@ -33,8 +33,9 @@
               },
             },
             animation: {
-              'fade-in': 'fadeIn 0.3s ease-out',
-              'scale-up': 'scaleUp 0.3s ease-out',
+              'fade-in': 'fadeIn 0.5s ease-out forwards',
+              'scale-up': 'scaleUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
+              'video-fade-in': 'fadeIn 1s ease-in-out forwards',
             },
             keyframes: {
               fadeIn: {

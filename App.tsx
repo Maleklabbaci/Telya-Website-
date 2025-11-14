@@ -11,7 +11,6 @@ import { AuthProvider } from './contexts/AuthContext';
 import AdminLoginPage from './pages/AdminLoginPage';
 
 const MainSite: React.FC = () => {
-  const [contactMessage, setContactMessage] = useState('');
 
   useEffect(() => {
     const handleSmoothScroll = (e: MouseEvent) => {
@@ -51,9 +50,9 @@ const MainSite: React.FC = () => {
       <main>
         <Hero />
         <Services />
-        <Portfolio setContactMessage={setContactMessage} />
+        <Portfolio />
         <Testimonials />
-        <Contact contactMessage={contactMessage} setContactMessage={setContactMessage} />
+        <Contact />
       </main>
       <Footer />
     </div>

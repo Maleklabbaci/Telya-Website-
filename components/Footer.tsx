@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { TelyaLogo } from './Logo';
 
 const SocialIcon: React.FC<{ href: string; children: React.ReactNode }> = ({ href, children }) => (
@@ -9,9 +9,26 @@ const SocialIcon: React.FC<{ href: string; children: React.ReactNode }> = ({ hre
 );
 
 const Footer: React.FC = () => {
+  const [isVisible, setIsVisible] = useState(false);
+  const footerRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setIsVisible(true);
+        observer.disconnect();
+      }
+    }, { threshold: 0.1 });
+
+    const currentRef = footerRef.current;
+    if (currentRef) observer.observe(currentRef);
+    
+    return () => { if(currentRef) observer.unobserve(currentRef) };
+  }, []);
+
   return (
-    <footer className="bg-black text-white">
-      <div className="container mx-auto px-6 py-12">
+    <footer ref={footerRef} className="bg-black text-white">
+      <div className={`container mx-auto px-6 py-12 transition-opacity duration-1000 ease-out ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
         <div className="flex flex-col md:flex-row justify-between items-center text-center md:text-left">
           <div className="mb-6 md:mb-0">
              <a href="#home" className="flex justify-center md:justify-start">
