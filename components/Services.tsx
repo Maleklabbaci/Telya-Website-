@@ -1,6 +1,5 @@
-
 import React, { useEffect, useRef, useState } from 'react';
-import { SeoIcon, SocialMediaIcon, ContentIcon, PpcIcon } from './icons';
+import { SocialMediaIcon, ContentIcon, DesignIcon, WebsiteSeoIcon, StrategyIcon, InfluencerIcon, DashboardIcon, VipBadgeIcon } from './icons';
 
 interface ServiceCardProps {
   icon: React.ReactNode;
@@ -38,7 +37,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ icon, title, description, ind
   return (
     <div
       ref={cardRef}
-      className={`bg-white p-8 rounded-xl shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 border border-gray-100 flex flex-col items-center text-center transform ${
+      className={`bg-white p-8 rounded-xl shadow-lg hover:shadow-2xl hover:-translate-y-2 hover:scale-105 border border-gray-100 flex flex-col items-center text-center transform transition-[opacity,transform] duration-500 ease-[cubic-bezier(0.175,0.885,0.32,1.275)] ${
         isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
       }`}
       style={{ transitionDelay: `${index * 100}ms` }}
@@ -55,24 +54,44 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ icon, title, description, ind
 const Services: React.FC = () => {
   const services = [
     {
-      icon: <SeoIcon />,
-      title: 'SEO & Référencement',
-      description: 'Augmentez votre visibilité sur les moteurs de recherche et attirez des voyageurs qualifiés prêts à réserver.',
+      icon: <ContentIcon />,
+      title: 'Réel Pro',
+      description: 'Création de vidéos type Reels, TikTok et Shorts pour dynamiser votre présence en ligne et captiver votre audience.',
+    },
+    {
+      icon: <DesignIcon />,
+      title: 'Design Graphique',
+      description: 'Conception de visuels percutants : posters, flyers, menus, et publications pour les réseaux sociaux.',
     },
     {
       icon: <SocialMediaIcon />,
-      title: 'Gestion des Réseaux Sociaux',
-      description: 'Créez une communauté engagée autour de votre marque avec des stratégies de contenu captivantes sur les plateformes sociales.',
+      title: 'Community Management',
+      description: 'Gestion complète de vos réseaux sociaux, de la publication de contenu à la modération et l\'engagement.',
     },
     {
-      icon: <ContentIcon />,
-      title: 'Création de Contenu Immersif',
-      description: 'Vidéos, photos, articles de blog... Nous produisons du contenu qui fait rêver et inspire le voyage.',
+      icon: <WebsiteSeoIcon />,
+      title: 'Site Web & SEO',
+      description: 'Création ou refonte de votre site web et optimisation du référencement pour attirer plus de visiteurs qualifiés.',
     },
     {
-      icon: <PpcIcon />,
-      title: 'Campagnes Publicitaires',
-      description: 'Ciblez précisément vos futurs clients avec des campagnes PPC (Pay-Per-Click) optimisées pour un retour sur investissement maximal.',
+      icon: <StrategyIcon />,
+      title: 'Stratégie Digitale & Audit',
+      description: 'Analyse, positionnement et plan éditorial sur mesure pour construire une stratégie digitale gagnante.',
+    },
+    {
+      icon: <InfluencerIcon />,
+      title: 'Collaboration Influenceurs',
+      description: 'Sélection, négociation et gestion de collaborations avec des influenceurs pour accroître votre notoriété.',
+    },
+    {
+      icon: <DashboardIcon />,
+      title: 'Dashboard Client & Suivi',
+      description: 'Accès à un tableau de bord personnalisé pour un suivi transparent et en temps réel de vos performances.',
+    },
+    {
+      icon: <VipBadgeIcon />,
+      title: 'Badge VIP',
+      description: 'Bénéficiez d\'avantages exclusifs et d\'un service premium pour propulser votre marque au sommet.',
     },
   ];
 

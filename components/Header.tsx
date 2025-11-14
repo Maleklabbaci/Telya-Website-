@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { TelyaLogo } from './Logo';
 import { useAuth } from '../contexts/AuthContext';
-import { useContent } from '../contexts/ContentContext';
 
 interface NavLinkProps {
   href: string;
@@ -29,7 +28,6 @@ const Header: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { isAdmin, logout } = useAuth();
-  const { saveContent } = useContent();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -48,29 +46,11 @@ const Header: React.FC = () => {
     { href: '#contact', label: 'Contact' },
   ];
 
-  const handlePublish = () => {
-    const contentToPublish = localStorage.getItem('siteContent');
-    if (!contentToPublish) {
-      alert("Aucun changement à publier. Veuillez d'abord sauvegarder.");
-      return;
-    }
-    const blob = new Blob([contentToPublish], { type: 'application/json;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'content-updates.json';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    alert("Le fichier `content-updates.json` a été téléchargé. Veuillez le transmettre au développeur pour mettre le site à jour.");
-  }
-
   return (
     <header className={`sticky top-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white shadow-md' : 'bg-transparent'}`}>
       <div className="container mx-auto px-6 py-4">
         <div className="flex justify-between items-center">
-          <a href="/">
+          <a href="#home">
             <TelyaLogo className={`text-3xl font-extrabold transition-all duration-300 ${isScrolled ? 'text-brand-green-700' : 'text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.4)]'}`} />
           </a>
           <nav className="hidden md:flex items-center space-x-8">
@@ -78,38 +58,15 @@ const Header: React.FC = () => {
                <NavLink key={link.href} {...link} isScrolled={isScrolled} />
             ))}
           </nav>
-          
-          <div className="hidden md:flex items-center space-x-2">
-            {isAdmin ? (
-              <>
-                <button
-                  onClick={saveContent}
-                  title="Sauvegarder les changements dans votre navigateur"
-                  className="bg-blue-600 text-white font-bold py-2 px-4 rounded-full hover:bg-blue-700 transition-transform duration-300 hover:scale-105 text-sm"
-                >
-                  Sauvegarder
-                </button>
-                <button
-                  onClick={handlePublish}
-                  title="Télécharger les changements pour les publier"
-                  className="bg-purple-600 text-white font-bold py-2 px-4 rounded-full hover:bg-purple-700 transition-transform duration-300 hover:scale-105 text-sm"
-                >
-                  Publier
-                </button>
-                 <button
-                  onClick={logout}
-                  className="bg-red-600 text-white font-bold py-2 px-4 rounded-full hover:bg-red-700 transition-transform duration-300 hover:scale-105 text-sm"
-                >
-                  Déconnexion
-                </button>
-              </>
-            ) : (
-              <a href="#contact" className="bg-brand-green-600 text-white font-bold py-2 px-6 rounded-full hover:bg-brand-green-700 transition-transform duration-300 hover:scale-105">
-                Commençons
-              </a>
-            )}
-          </div>
-
+          {isAdmin ? (
+             <button onClick={logout} className="hidden md:inline-block bg-red-600 text-white font-bold py-2 px-6 rounded-full hover:bg-red-700 transition-transform duration-300 hover:scale-105">
+              Déconnexion
+            </button>
+          ) : (
+            <a href="#contact" className="hidden md:inline-block bg-brand-green-600 text-white font-bold py-2 px-6 rounded-full hover:bg-brand-green-700 transition-transform duration-300 hover:scale-105">
+              Commençons
+            </a>
+          )}
           <button className={`md:hidden transition-colors ${isScrolled ? 'text-gray-900' : 'text-white [filter:drop-shadow(0_1px_1px_rgba(0,0,0,0.7))]'}`} onClick={() => setIsMenuOpen(!isMenuOpen)}>
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={isMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}></path>
@@ -122,27 +79,10 @@ const Header: React.FC = () => {
               {navLinks.map((link) => (
                 <NavLink key={link.href} {...link} isScrolled={isScrolled} isMobile={true} onClick={() => setIsMenuOpen(false)} />
               ))}
-               {isAdmin ? (
-                 <div className="flex flex-col space-y-2 pt-4 mt-2 border-t border-gray-700">
-                    <button
-                      onClick={() => { saveContent(); setIsMenuOpen(false); }}
-                      className="bg-blue-600 text-white font-bold py-3 px-6 rounded-full hover:bg-blue-700 transition-transform duration-300 hover:scale-105 text-center"
-                    >
-                      Sauvegarder
-                    </button>
-                    <button
-                      onClick={() => { handlePublish(); setIsMenuOpen(false); }}
-                      className="bg-purple-600 text-white font-bold py-3 px-6 rounded-full hover:bg-purple-700 transition-transform duration-300 hover:scale-105 text-center"
-                    >
-                      Publier
-                    </button>
-                    <button
-                        onClick={() => { logout(); setIsMenuOpen(false); }}
-                        className="bg-red-600 text-white font-bold py-3 px-6 rounded-full hover:bg-red-700 transition-transform duration-300 hover:scale-105 text-center"
-                    >
-                        Déconnexion
-                    </button>
-                 </div>
+              {isAdmin ? (
+                <button onClick={() => { logout(); setIsMenuOpen(false); }} className="bg-red-600 text-white font-bold py-3 px-6 rounded-full hover:bg-red-700 transition-transform duration-300 hover:scale-105 text-center">
+                  Déconnexion
+                </button>
               ) : (
                 <a href="#contact" onClick={() => setIsMenuOpen(false)} className="bg-brand-green-600 text-white font-bold py-3 px-6 rounded-full hover:bg-brand-green-700 transition-transform duration-300 hover:scale-105 text-center">
                   Commençons

@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 
 interface AuthContextType {
   isAdmin: boolean;
@@ -13,16 +13,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const adminStatus = sessionStorage.getItem('isAdmin');
-    if (adminStatus === 'true') {
+    const loggedIn = sessionStorage.getItem('isAdmin') === 'true';
+    if (loggedIn) {
       setIsAdmin(true);
     }
   }, []);
 
-  const login = (password: string): boolean => {
+  const login = (password: string) => {
     if (password === 'malek123') {
       sessionStorage.setItem('isAdmin', 'true');
       setIsAdmin(true);
+      window.location.href = '/'; // Redirect to home page
       return true;
     }
     return false;
@@ -31,7 +32,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     sessionStorage.removeItem('isAdmin');
     setIsAdmin(false);
-    window.location.href = '/';
+     window.location.href = '/'; // Redirect to home page
   };
 
   return (
@@ -41,9 +42,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 };
 
-export const useAuth = (): AuthContextType => {
+export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;

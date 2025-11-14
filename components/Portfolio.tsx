@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 
 interface PortfolioItemProps {
@@ -42,11 +41,18 @@ const PortfolioItem: React.FC<PortfolioItemProps> = ({ imageSrc, category, title
       }`}
       style={{ transitionDelay: `${index * 100}ms` }}
     >
-      <img src={imageSrc} alt={title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+      <img src={imageSrc} alt={title} className="w-full h-full object-cover transition-transform duration-500 ease-in-out group-hover:scale-110" />
+      
+      {/* Base gradient */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-      <div className="absolute bottom-0 left-0 p-6 text-white">
+      
+      {/* Darkening overlay on hover to make text pop */}
+      <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-40 transition-opacity duration-300 ease-in-out"></div>
+
+      {/* Text container shifts up and becomes more prominent on hover */}
+      <div className="absolute bottom-0 left-0 p-6 text-white w-full transition-transform duration-300 ease-in-out group-hover:-translate-y-2">
         <span className="text-sm font-semibold text-brand-green-400 uppercase tracking-wider">{category}</span>
-        <h3 className="text-2xl font-bold mt-1">{title}</h3>
+        <h3 className="text-2xl font-bold mt-1 transition-transform duration-300 ease-in-out group-hover:scale-105 origin-bottom-left">{title}</h3>
       </div>
     </div>
   );
