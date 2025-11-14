@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { EditableText } from './EditableText';
 
 const Hero: React.FC = () => {
   return (
@@ -17,17 +18,21 @@ const Hero: React.FC = () => {
       </video>
        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent z-10"></div>
       <div className="relative z-20 text-center px-6">
-        <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold mb-4 drop-shadow-lg leading-tight">
-          Propulsez Votre Marque Touristique
-        </h1>
-        <p className="text-lg md:text-2xl mb-8 max-w-3xl mx-auto drop-shadow-md font-light">
-          Telya Agency - Votre partenaire en marketing digital pour le tourisme et les loisirs.
-        </p>
+        <EditableText
+          as="h1"
+          fieldId="hero.title"
+          className="text-4xl md:text-6xl lg:text-7xl font-extrabold mb-4 drop-shadow-lg leading-tight"
+        />
+        <EditableText
+          as="p"
+          fieldId="hero.subtitle"
+          className="text-lg md:text-2xl mb-8 max-w-3xl mx-auto drop-shadow-md font-light"
+        />
         <a 
           href="#services"
           className="bg-brand-green-600 text-white font-bold py-4 px-10 rounded-full text-lg hover:bg-brand-green-700 transition-all duration-300 transform hover:scale-110 active:scale-105 shadow-lg"
         >
-          Découvrir Nos Services
+          <EditableText fieldId="hero.cta" />
         </a>
       </div>
     </section>
