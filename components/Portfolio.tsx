@@ -16,6 +16,13 @@ const Portfolio: React.FC = () => {
   const headerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('portfolio-success') === 'true') {
+      setIsModalOpen(true);
+    }
+  }, []);
+
+  useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) {
         setHeaderVisible(true);
