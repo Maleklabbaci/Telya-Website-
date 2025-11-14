@@ -16,6 +16,7 @@ const Hero: React.FC = () => {
   const [isTextVisible, setIsTextVisible] = useState(false);
   const [loadVideo, setLoadVideo] = useState(false);
   const heroRef = useRef<HTMLElement>(null);
+  const [isButtonClicked, setIsButtonClicked] = useState(false);
 
   // Effet pour l'animation du texte au chargement
   useEffect(() => {
@@ -51,7 +52,12 @@ const Hero: React.FC = () => {
   }, []);
 
   const openCalendly = () => {
+    setIsButtonClicked(true);
     setIsModalOpen(true);
+    // Réinitialise l'état de l'animation après sa durée pour permettre de la rejouer
+    setTimeout(() => {
+      setIsButtonClicked(false);
+    }, 400); // Durée de l'animation 'button-pulse'
   };
 
   return (
@@ -59,7 +65,7 @@ const Hero: React.FC = () => {
       <section 
         id="home" 
         ref={heroRef} // Attache la ref à la section pour l'observer
-        className="relative h-screen flex items-center justify-center text-white overflow-hidden"
+        className="relative h-screen flex items-center justify-center text-white overflow-hidden bg-black"
       >
         <div className="absolute inset-0 bg-black opacity-50 z-10"></div>
         <video 
@@ -88,7 +94,7 @@ const Hero: React.FC = () => {
           </p>
           <button 
             onClick={openCalendly}
-            className={`bg-brand-green-600 text-white font-bold py-4 px-10 rounded-full text-lg hover:bg-brand-green-700 transition-all duration-300 transform hover:scale-110 active:scale-105 shadow-lg ${isTextVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}
+            className={`bg-brand-green-600 text-white font-bold py-4 px-10 rounded-full text-lg hover:bg-brand-green-700 transition-all duration-300 transform hover:scale-110 active:scale-105 shadow-lg ${isTextVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'} ${isButtonClicked ? 'animate-button-pulse' : ''}`}
             style={{ transitionDelay: '500ms' }}
           >
             Réserver un Appel
