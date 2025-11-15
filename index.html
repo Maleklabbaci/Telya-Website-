@@ -38,6 +38,7 @@
               'scale-up': 'scaleUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
               'video-fade-in': 'fadeIn 1s ease-in-out forwards',
               'button-pulse': 'buttonPulse 0.4s ease-out',
+              'fade-in-content': 'fadeInContent 0.7s ease-in-out forwards',
             },
             keyframes: {
               fadeIn: {
@@ -53,6 +54,10 @@
                 '70%': { boxShadow: '0 0 0 15px rgba(0, 160, 102, 0)' },
                 '100%': { boxShadow: '0 0 0 0 rgba(0, 160, 102, 0)' },
               },
+              fadeInContent: {
+                '0%': { opacity: 0, transform: 'translateY(10px)' },
+                '100%': { opacity: 1, transform: 'translateY(0)' },
+              }
             },
           }
         }

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { SocialMediaIcon, ContentIcon, DesignIcon, WebsiteSeoIcon, StrategyIcon, InfluencerIcon, DashboardIcon, VipBadgeIcon } from './icons';
 
@@ -13,7 +12,7 @@ interface ServiceCardProps {
 const ServiceCard: React.FC<ServiceCardProps> = ({ icon, title, description, index, isVisible }) => {
   return (
     <div
-      className={`bg-white p-8 rounded-xl shadow-lg hover:shadow-2xl hover:-translate-y-2 hover:scale-105 border border-gray-100 flex flex-col items-center text-center transform transition-[opacity,transform] duration-500 ease-[cubic-bezier(0.175,0.885,0.32,1.275)] ${
+      className={`bg-white p-8 rounded-xl shadow-lg hover:shadow-2xl hover:scale-105 border border-gray-100 flex flex-col items-center text-center transform transition-[opacity,transform] duration-500 ease-[cubic-bezier(0.175,0.885,0.32,1.275)] ${
         isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
       }`}
       style={{ transitionDelay: `${index * 100}ms` }}

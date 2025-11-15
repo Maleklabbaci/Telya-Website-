@@ -9,7 +9,7 @@ interface PortfolioModalProps {
 const PortfolioModal: React.FC<PortfolioModalProps> = ({ onClose }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState({ name: '', email: '', companyName: '' });
-  const [errors, setErrors] = useState<{ name?: string; email?: string }>({});
+  const [errors, setErrors] = useState<{ name?: string; email?: string; companyName?: string }>({});
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -39,7 +39,7 @@ const PortfolioModal: React.FC<PortfolioModalProps> = ({ onClose }) => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const newErrors: { name?: string; email?: string } = {};
+    const newErrors: { name?: string; email?: string; companyName?: string } = {};
 
     if (!formData.name.trim()) newErrors.name = "Le nom est requis.";
     if (!formData.email.trim()) {
@@ -47,6 +47,8 @@ const PortfolioModal: React.FC<PortfolioModalProps> = ({ onClose }) => {
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
         newErrors.email = "L'adresse e-mail n'est pas valide.";
     }
+    if (!formData.companyName.trim()) newErrors.companyName = "Le nom de l'établissement est requis.";
+
 
     if (Object.keys(newErrors).length > 0) {
         setErrors(newErrors);
@@ -98,8 +100,9 @@ const PortfolioModal: React.FC<PortfolioModalProps> = ({ onClose }) => {
                       {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
                   </div>
                   <div>
-                      <label htmlFor="modal-companyName" className="block text-sm font-medium text-gray-700 mb-1">Nom d'établissement (Optionnel)</label>
-                      <input type="text" name="companyName" id="modal-companyName" value={formData.companyName} onChange={handleChange} placeholder="Ex: Hôtel Le Grand Panorama" className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition" />
+                      <label htmlFor="modal-companyName" className="block text-sm font-medium text-gray-700 mb-1">Nom d'établissement</label>
+                      <input type="text" name="companyName" id="modal-companyName" value={formData.companyName} onChange={handleChange} placeholder="Ex: Hôtel Le Grand Panorama" className={`w-full px-4 py-2 bg-gray-50 border rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition ${errors.companyName ? 'border-red-500' : 'border-gray-300'}`} />
+                      {errors.companyName && <p className="text-red-500 text-xs mt-1">{errors.companyName}</p>}
                   </div>
                   <div className="pt-2">
                       <button

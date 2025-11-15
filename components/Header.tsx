@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { TelyaLogo } from './Logo';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -25,6 +25,20 @@ const NavLink: React.FC<NavLinkProps> = ({ href, label, isMobile = false, onClic
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { isAdmin, logout } = useAuth();
+  const headerRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (headerRef.current && !headerRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const navLinks = [
     { href: '#services', label: 'Services' },
@@ -34,7 +48,7 @@ const Header: React.FC = () => {
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-brand-green-700 shadow-lg">
+    <header ref={headerRef} className="sticky top-0 z-50 bg-brand-green-700 shadow-lg">
       <div className="px-6 py-4">
         <div className="flex justify-between items-center">
           <a href="#home">
@@ -50,7 +64,7 @@ const Header: React.FC = () => {
               Déconnexion
             </button>
           ) : (
-            <a href="#contact" className="hidden md:inline-block font-bold py-2 px-6 rounded-full transition-all duration-300 transform hover:scale-105 active:scale-100 bg-white text-brand-green-700 hover:bg-gray-100">
+            <a href="#contact" className="hidden md:inline-block font-bold py-2 px-6 rounded-full transition-all duration-300 transform hover:scale-105 active:scale-100 bg-white text-brand-green-700 hover:bg-brand-green-50 hover:shadow-lg">
               Commençons
             </a>
           )}
@@ -76,7 +90,7 @@ const Header: React.FC = () => {
                   Déconnexion
                 </button>
               ) : (
-                <a href="#contact" onClick={() => setIsMenuOpen(false)} className="font-bold py-3 px-6 rounded-full transition-all duration-300 transform hover:scale-105 active:scale-100 text-center bg-white text-brand-green-700 hover:bg-gray-100">
+                <a href="#contact" onClick={() => setIsMenuOpen(false)} className="font-bold py-3 px-6 rounded-full transition-all duration-300 transform hover:scale-105 active:scale-100 text-center bg-white text-brand-green-700 hover:bg-brand-green-50 hover:shadow-lg">
                   Commençons
                 </a>
               )}
