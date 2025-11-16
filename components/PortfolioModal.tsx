@@ -72,30 +72,33 @@ const PortfolioModal: React.FC<PortfolioModalProps> = ({ onClose }) => {
     setErrors({});
     setIsSubmitting(true);
     setSubmitError('');
-
-    const htmlContent = `
-        <h2>Nouvelle demande d'accès au portfolio</h2>
-        <p><strong>Nom:</strong> ${formData.name}</p>
-        <p><strong>Email:</strong> ${formData.email}</p>
-        <p><strong>Nom de l'établissement:</strong> ${formData.companyName}</p>
-    `;
     
+    const { name, email, companyName } = formData;
+    const subject = `Demande de Portfolio de ${companyName || name}`;
+    const htmlContent = `
+        <h2>Nouvelle demande d'accès au Portfolio</h2>
+        <p><strong>Nom:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Nom de l'établissement:</strong> ${companyName}</p>
+    `;
+
     try {
         const response = await fetch('/api/send-email', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                name: formData.name,
-                email: formData.email,
-                subject: `Demande de Portfolio de ${formData.companyName}`,
-                htmlContent: htmlContent,
-            }),
+                name,
+                email,
+                subject,
+                htmlContent
+            })
         });
 
         if (response.ok) {
             window.location.href = '/thank-you';
         } else {
-            setSubmitError("L'envoi de la demande a échoué. Veuillez réessayer plus tard.");
+            const errorData = await response.json();
+            setSubmitError(errorData.error || "L'envoi a échoué. Veuillez réessayer plus tard.");
         }
     } catch (error) {
         setSubmitError("Une erreur réseau s'est produite. Veuillez vérifier votre connexion et réessayer.");
@@ -122,7 +125,6 @@ const PortfolioModal: React.FC<PortfolioModalProps> = ({ onClose }) => {
               <p className="text-gray-600 mb-6">Remplissez ce formulaire pour recevoir un accès exclusif à nos réalisations.</p>
               <form 
                 onSubmit={handleSubmit}
-                noValidate
                 className="space-y-4 text-left"
               >
                   <div>

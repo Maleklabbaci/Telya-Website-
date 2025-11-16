@@ -90,26 +90,27 @@ const QuestionnairePage: React.FC = () => {
     setIsSubmitting(true);
     setSubmitError('');
 
+    const { companyName, establishmentType, objectives, otherObjectiveMessage, budget, name, email, phone } = formData;
+    const subject = `Nouveau projet de ${companyName}`;
     const htmlContent = `
-        <h1 style="font-family: Arial, sans-serif; color: #333;">Nouveau questionnaire de projet soumis</h1>
-        <hr>
-        <h2 style="font-family: Arial, sans-serif; color: #01592C;">1. À propos de l'établissement</h2>
-        <p><strong>Nom de l'établissement:</strong> ${formData.companyName}</p>
-        <p><strong>Type d'établissement:</strong> ${formData.establishmentType}</p>
-        <br>
-        <h2 style="font-family: Arial, sans-serif; color: #01592C;">2. Objectifs</h2>
+        <h1>Nouvelle demande de projet via le questionnaire</h1>
+        <h2>1. À propos de l'établissement</h2>
+        <p><strong>Nom de l'établissement:</strong> ${companyName}</p>
+        <p><strong>Type d'établissement:</strong> ${establishmentType}</p>
+        
+        <h2>2. Objectifs</h2>
         <ul>
-            ${formData.objectives.map(obj => `<li>${obj}</li>`).join('')}
+            ${objectives.map(obj => `<li>${obj}</li>`).join('')}
         </ul>
-        ${formData.objectives.includes("Autre (à préciser dans le message)") ? `<p><strong>Précision (Autre):</strong> ${formData.otherObjectiveMessage.replace(/\n/g, '<br>')}</p>` : ''}
-        <br>
-        <h2 style="font-family: Arial, sans-serif; color: #01592C;">3. Budget</h2>
-        <p><strong>Budget marketing mensuel:</strong> ${formData.budget}</p>
-        <br>
-        <h2 style="font-family: Arial, sans-serif; color: #01592C;">4. Coordonnées</h2>
-        <p><strong>Nom complet:</strong> ${formData.name}</p>
-        <p><strong>Email:</strong> <a href="mailto:${formData.email}">${formData.email}</a></p>
-        <p><strong>Téléphone:</strong> ${formData.phone}</p>
+        ${objectives.includes("Autre (à préciser dans le message)") ? `<p><strong>Précision (Autre):</strong> ${otherObjectiveMessage.replace(/\n/g, '<br>')}</p>` : ''}
+        
+        <h2>3. Budget marketing mensuel</h2>
+        <p>${budget}</p>
+
+        <h2>4. Coordonnées</h2>
+        <p><strong>Nom complet:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Téléphone:</strong> ${phone}</p>
     `;
 
     try {
@@ -117,17 +118,18 @@ const QuestionnairePage: React.FC = () => {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                name: formData.name,
-                email: formData.email,
-                subject: `Nouveau questionnaire projet de ${formData.companyName}`,
-                htmlContent: htmlContent,
-            }),
+                name,
+                email,
+                subject,
+                htmlContent
+            })
         });
 
         if (response.ok) {
             window.location.href = '/thank-you';
         } else {
-            setSubmitError("L'envoi de votre demande a échoué. Veuillez réessayer plus tard.");
+            const errorData = await response.json();
+            setSubmitError(errorData.error || "L'envoi a échoué. Veuillez réessayer plus tard.");
         }
     } catch (error) {
         setSubmitError("Une erreur réseau s'est produite. Veuillez vérifier votre connexion et réessayer.");
@@ -171,7 +173,6 @@ const QuestionnairePage: React.FC = () => {
         <div className="bg-white p-8 md:p-12 rounded-xl shadow-lg border border-gray-100">
             <form 
               onSubmit={handleSubmit} 
-              noValidate
               className="space-y-12"
             >
               <div className="animate-fade-in-content" style={{ animationDelay: '100ms' }}>
