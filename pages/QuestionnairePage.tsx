@@ -65,11 +65,11 @@ const QuestionnairePage: React.FC = () => {
       setErrors(newErrors);
       const firstErrorKey = Object.keys(newErrors)[0];
       if (firstErrorKey) {
-        const elementId = firstErrorKey === 'objectives' ? 'objectives-section' : firstErrorKey;
+        const elementId = ['objectives', 'budget'].includes(firstErrorKey) ? `${firstErrorKey}-section` : firstErrorKey;
         const errorElement = document.getElementById(elementId);
         if (errorElement) {
           errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          if (elementId !== 'objectives-section' && 'focus' in errorElement) {
+          if (!['objectives-section', 'budget-section'].includes(elementId) && 'focus' in errorElement) {
              (errorElement as HTMLElement).focus({ preventScroll: true });
           }
         }
@@ -88,6 +88,15 @@ const QuestionnairePage: React.FC = () => {
     "Refonte de notre site web",
     "Lancer des campagnes publicitaires",
     "Autre (à préciser dans le message)",
+  ];
+  
+  const budgetOptions = [
+    "Moins de 500€",
+    "500€ - 1,500€",
+    "1,500€ - 3,000€",
+    "3,000€ - 5,000€",
+    "Plus de 5,000€",
+    "Je ne sais pas encore",
   ];
 
   const nextUrl = typeof window !== 'undefined' ? `${window.location.origin}/thank-you` : '';
@@ -110,7 +119,7 @@ const QuestionnairePage: React.FC = () => {
             action="https://formsubmit.co/telyaagency@gmail.com" 
             method="POST" 
             onSubmit={handleSubmit} 
-            className="space-y-8"
+            className="space-y-12"
             noValidate
           >
             <input type="hidden" name="_subject" value={`Nouveau projet de ${formData.companyName}`} />
@@ -156,20 +165,31 @@ const QuestionnairePage: React.FC = () => {
               </div>
             </div>
 
-            <div className="animate-fade-in-content" style={{ animationDelay: '300ms' }}>
+            <div id="budget-section" className="animate-fade-in-content" style={{ animationDelay: '300ms' }}>
               <h2 className="text-xl font-bold text-gray-800 mb-4 border-b-2 border-brand-green-200 pb-2">3. Votre budget</h2>
               <div className="mt-4">
-                <label htmlFor="budget" className="block text-sm font-medium text-gray-700">Quelle est votre estimation de budget marketing mensuel ?</label>
-                <select name="budget" id="budget" value={formData.budget} onChange={handleInputChange} className={`mt-1 block w-full px-4 py-3 bg-white border rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition-colors ${errors.budget ? 'border-red-500' : 'border-gray-300'}`} required>
-                  <option value="">Sélectionnez une fourchette de prix</option>
-                  <option>Moins de 500€</option>
-                  <option>500€ - 1,500€</option>
-                  <option>1,500€ - 3,000€</option>
-                  <option>3,000€ - 5,000€</option>
-                  <option>Plus de 5,000€</option>
-                  <option>Je ne sais pas encore</option>
-                </select>
-                {errors.budget && <p className="text-red-500 text-xs mt-1">{errors.budget}</p>}
+                <label className="block text-sm font-medium text-gray-700 mb-2">Quelle est votre estimation de budget marketing mensuel ?</label>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {budgetOptions.map((option) => (
+                      <label key={option} className={`block cursor-pointer rounded-lg border p-3 text-center text-sm font-medium transition-all duration-200 ${
+                          formData.budget === option
+                            ? 'border-brand-green-600 bg-brand-green-50 ring-2 ring-brand-green-500 shadow-md'
+                            : 'border-gray-300 bg-white hover:bg-gray-50'
+                      }`}>
+                        <input
+                          type="radio"
+                          name="budget"
+                          value={option}
+                          checked={formData.budget === option}
+                          onChange={handleInputChange}
+                          className="sr-only"
+                          aria-labelledby={`budget-label-${option}`}
+                        />
+                        <span id={`budget-label-${option}`}>{option}</span>
+                      </label>
+                    ))}
+                </div>
+                {errors.budget && <p className="text-red-500 text-xs mt-2">{errors.budget}</p>}
               </div>
             </div>
             

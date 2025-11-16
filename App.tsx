@@ -12,6 +12,7 @@ import AdminLoginPage from './pages/AdminLoginPage';
 import ThankYouPage from './pages/ThankYouPage';
 import ScrollToTopButton from './components/ScrollToTopButton';
 import QuestionnairePage from './pages/QuestionnairePage';
+import IntroPage from './pages/IntroPage';
 
 const MainSite: React.FC = () => {
 
@@ -92,6 +93,8 @@ const App: React.FC = () => {
     content = <ThankYouPage />;
   } else if (path === '/questionnaire') {
     content = <QuestionnairePage />;
+  } else if (path === '/intro') {
+    content = <IntroPage />;
   }
   else {
     content = <MainSite />;

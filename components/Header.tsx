@@ -65,7 +65,7 @@ const Header: React.FC = () => {
               Déconnexion
             </button>
           ) : (
-            <a href="/questionnaire" className="hidden md:inline-block font-bold py-2 px-6 rounded-full transition-all duration-300 transform hover:scale-105 active:scale-100 bg-white text-brand-green-700 hover:bg-brand-green-50 hover:shadow-lg">
+            <a href="/intro" className="hidden md:inline-block font-bold py-2 px-6 rounded-full transition-all duration-300 transform hover:scale-105 active:scale-100 bg-white text-brand-green-700 hover:bg-brand-green-50 hover:shadow-lg">
               Commençons
             </a>
           )}
@@ -91,7 +91,7 @@ const Header: React.FC = () => {
                   Déconnexion
                 </button>
               ) : (
-                <a href="/questionnaire" onClick={() => setIsMenuOpen(false)} className="font-bold py-3 px-6 rounded-full transition-all duration-300 transform hover:scale-105 active:scale-100 text-center bg-white text-brand-green-700 hover:bg-brand-green-50 hover:shadow-lg">
+                <a href="/intro" onClick={() => setIsMenuOpen(false)} className="font-bold py-3 px-6 rounded-full transition-all duration-300 transform hover:scale-105 active:scale-100 text-center bg-white text-brand-green-700 hover:bg-brand-green-50 hover:shadow-lg">
                   Commençons
                 </a>
               )}
