@@ -67,6 +67,11 @@ const Hero: React.FC = () => {
         ref={heroRef} // Attache la ref à la section pour l'observer
         className="relative h-screen flex items-center justify-center text-white overflow-hidden bg-black"
       >
+        {!loadVideo && (
+          <div className="absolute inset-0 flex items-center justify-center z-10">
+            <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        )}
         <div className="absolute inset-0 bg-black opacity-50 z-10"></div>
         <video 
           autoPlay

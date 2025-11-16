@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { TelyaLogo } from './Logo';
 import { useAuth } from '../contexts/AuthContext';
@@ -51,7 +52,7 @@ const Header: React.FC = () => {
     <header ref={headerRef} className="sticky top-0 z-50 bg-brand-green-700 shadow-lg">
       <div className="px-6 py-4">
         <div className="flex justify-between items-center">
-          <a href="#home">
+          <a href="/">
             <TelyaLogo className="text-3xl font-extrabold text-white" />
           </a>
           <nav className="hidden md:flex items-center space-x-8">
@@ -64,7 +65,7 @@ const Header: React.FC = () => {
               Déconnexion
             </button>
           ) : (
-            <a href="#contact" className="hidden md:inline-block font-bold py-2 px-6 rounded-full transition-all duration-300 transform hover:scale-105 active:scale-100 bg-white text-brand-green-700 hover:bg-brand-green-50 hover:shadow-lg">
+            <a href="/questionnaire" className="hidden md:inline-block font-bold py-2 px-6 rounded-full transition-all duration-300 transform hover:scale-105 active:scale-100 bg-white text-brand-green-700 hover:bg-brand-green-50 hover:shadow-lg">
               Commençons
             </a>
           )}
@@ -90,7 +91,7 @@ const Header: React.FC = () => {
                   Déconnexion
                 </button>
               ) : (
-                <a href="#contact" onClick={() => setIsMenuOpen(false)} className="font-bold py-3 px-6 rounded-full transition-all duration-300 transform hover:scale-105 active:scale-100 text-center bg-white text-brand-green-700 hover:bg-brand-green-50 hover:shadow-lg">
+                <a href="/questionnaire" onClick={() => setIsMenuOpen(false)} className="font-bold py-3 px-6 rounded-full transition-all duration-300 transform hover:scale-105 active:scale-100 text-center bg-white text-brand-green-700 hover:bg-brand-green-50 hover:shadow-lg">
                   Commençons
                 </a>
               )}

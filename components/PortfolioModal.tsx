@@ -52,6 +52,14 @@ const PortfolioModal: React.FC<PortfolioModalProps> = ({ onClose }) => {
 
     if (Object.keys(newErrors).length > 0) {
         setErrors(newErrors);
+        const firstErrorKey = Object.keys(newErrors)[0] as keyof typeof newErrors;
+        if (firstErrorKey) {
+            const elementId = `modal-${firstErrorKey}`;
+            const errorElement = document.getElementById(elementId);
+            if (errorElement) {
+                errorElement.focus();
+            }
+        }
         return;
     }
     setErrors({});
@@ -81,6 +89,7 @@ const PortfolioModal: React.FC<PortfolioModalProps> = ({ onClose }) => {
                 method="POST"
                 onSubmit={handleSubmit}
                 className="space-y-4 text-left"
+                noValidate
               >
                   {/* Hidden Fields for FormSubmit */}
                   <input type="hidden" name="_subject" value={`Demande de Portfolio de ${formData.companyName || formData.name}`} />
@@ -101,7 +110,7 @@ const PortfolioModal: React.FC<PortfolioModalProps> = ({ onClose }) => {
                   </div>
                   <div>
                       <label htmlFor="modal-companyName" className="block text-sm font-medium text-gray-700 mb-1">Nom d'établissement</label>
-                      <input type="text" name="companyName" id="modal-companyName" value={formData.companyName} onChange={handleChange} placeholder="Ex: Hôtel Le Grand Panorama" className={`w-full px-4 py-2 bg-gray-50 border rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition ${errors.companyName ? 'border-red-500' : 'border-gray-300'}`} />
+                      <input type="text" name="companyName" id="modal-companyName" value={formData.companyName} onChange={handleChange} placeholder="Ex: Hôtel Le Grand Panorama" className={`w-full px-4 py-2 bg-gray-50 border rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition ${errors.companyName ? 'border-red-500' : 'border-gray-300'}`} required/>
                       {errors.companyName && <p className="text-red-500 text-xs mt-1">{errors.companyName}</p>}
                   </div>
                   <div className="pt-2">

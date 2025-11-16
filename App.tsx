@@ -11,6 +11,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import AdminLoginPage from './pages/AdminLoginPage';
 import ThankYouPage from './pages/ThankYouPage';
 import ScrollToTopButton from './components/ScrollToTopButton';
+import QuestionnairePage from './pages/QuestionnairePage';
 
 const MainSite: React.FC = () => {
 
@@ -37,21 +38,41 @@ const App: React.FC = () => {
   useEffect(() => {
     const onLocationChange = () => {
       setPath(window.location.pathname);
+      window.scrollTo(0, 0);
     };
 
     const handleAnchorClick = (e: MouseEvent) => {
         const target = e.target as HTMLElement;
         const anchor = target.closest('a');
-        if (anchor && anchor.pathname !== window.location.pathname) {
-            // It's an external link or a link to another page, let the browser handle it.
-            return;
+        
+        if (!anchor || e.metaKey || e.ctrlKey || e.shiftKey) return;
+        
+        const href = anchor.getAttribute('href');
+        if (!href) return;
+        
+        // External links
+        if (anchor.host !== window.location.host) return;
+
+        // Hash links
+        if (href.startsWith('#')) {
+            const mainSitePath = ['/', '/index.html'].includes(window.location.pathname);
+            if (mainSitePath) {
+                // Let default browser behavior handle scrolling on main page
+                return;
+            } else {
+                // If on another page, navigate to main page with hash
+                // This will be a full page load, which is acceptable for this edge case.
+                window.location.href = `/${href}`;
+                e.preventDefault();
+                return;
+            }
         }
         
-        if (anchor && anchor.hash) {
-           const mainSitePath = ['/', '/index.html'].includes(window.location.pathname);
-           if (!mainSitePath) {
-               window.location.href = `/${anchor.hash}`;
-           }
+        // Internal navigation
+        e.preventDefault();
+        if (window.location.pathname !== href || window.location.search !== anchor.search) {
+            window.history.pushState({}, '', href);
+            onLocationChange();
         }
     };
     
@@ -69,6 +90,8 @@ const App: React.FC = () => {
     content = <AdminLoginPage />;
   } else if (path === '/thank-you') {
     content = <ThankYouPage />;
+  } else if (path === '/questionnaire') {
+    content = <QuestionnairePage />;
   }
   else {
     content = <MainSite />;

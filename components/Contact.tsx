@@ -113,6 +113,14 @@ const Contact: React.FC = () => {
 
     if (Object.keys(newErrors).length > 0) {
         setErrors(newErrors);
+        const firstErrorKey = Object.keys(newErrors)[0] as keyof typeof newErrors;
+        if (firstErrorKey) {
+            const errorElement = document.getElementById(firstErrorKey);
+            if (errorElement) {
+                errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                errorElement.focus({ preventScroll: true });
+            }
+        }
         return;
     }
     
@@ -144,6 +152,7 @@ const Contact: React.FC = () => {
               encType="multipart/form-data"
               onSubmit={handleSubmit} 
               className="space-y-6"
+              noValidate
             >
               <input type="hidden" name="_subject" value={`Nouveau message de ${formData.companyName || formData.name}`} />
               <input type="hidden" name="_captcha" value="false" />
@@ -162,6 +171,7 @@ const Contact: React.FC = () => {
                     onChange={handleChange}
                     className={`w-full px-4 py-3 bg-white text-gray-900 border rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition-colors placeholder-gray-500 ${errors.name ? 'border-red-500' : 'border-gray-300'}`}
                     placeholder="Votre nom"
+                    required
                   />
                   {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
                 </div>
@@ -175,6 +185,7 @@ const Contact: React.FC = () => {
                     onChange={handleChange}
                     className={`w-full px-4 py-3 bg-white text-gray-900 border rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition-colors placeholder-gray-500 ${errors.email ? 'border-red-500' : 'border-gray-300'}`}
                     placeholder="Votre e-mail"
+                    required
                   />
                   {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
                 </div>
@@ -229,13 +240,14 @@ const Contact: React.FC = () => {
                   onChange={handleChange}
                   className={`w-full px-4 py-3 bg-white text-gray-900 border rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition-colors placeholder-gray-500 ${errors.message ? 'border-red-500' : 'border-gray-300'}`}
                   placeholder="Parlez-nous de votre établissement et de vos besoins (marketing, réseaux sociaux, shooting…)"
+                  required
                 ></textarea>
                 {errors.message && <p className="text-red-500 text-xs mt-1">{errors.message}</p>}
               </div>
               <div className="text-center">
                 <button
                   type="submit"
-                  className="bg-brand-green-600 text-white font-bold py-3 px-10 rounded-full text-lg hover:bg-brand-green-700 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg"
+                  className="bg-brand-green-600 text-white font-bold py-3 px-10 rounded-full text-lg hover:bg-brand-green-700 transition-all duration-300 transform active:scale-95 shadow-lg hover:animate-gentle-pulse"
                 >
                   Envoyer le Message
                 </button>

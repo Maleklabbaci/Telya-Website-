@@ -39,6 +39,8 @@
               'video-fade-in': 'fadeIn 1s ease-in-out forwards',
               'button-pulse': 'buttonPulse 0.4s ease-out',
               'fade-in-content': 'fadeInContent 0.7s ease-in-out forwards',
+              'spin': 'spin 1s linear infinite',
+              'gentle-pulse': 'gentlePulse 1.5s ease-in-out infinite',
             },
             keyframes: {
               fadeIn: {
@@ -57,6 +59,14 @@
               fadeInContent: {
                 '0%': { opacity: 0, transform: 'translateY(10px)' },
                 '100%': { opacity: 1, transform: 'translateY(0)' },
+              },
+              spin: {
+                '0%': { transform: 'rotate(0deg)' },
+                '100%': { transform: 'rotate(360deg)' },
+              },
+              gentlePulse: {
+                '0%, 100%': { transform: 'scale(1)' },
+                '50%': { transform: 'scale(1.05)' },
               }
             },
           }
