@@ -7,6 +7,7 @@ const QuestionnairePage: React.FC = () => {
     companyName: '',
     establishmentType: '',
     objectives: [] as string[],
+    otherObjectiveMessage: '',
     budget: '',
     name: '',
     email: '',
@@ -48,6 +49,9 @@ const QuestionnairePage: React.FC = () => {
     if (!formData.companyName.trim()) newErrors.companyName = "Le nom de l'établissement est requis.";
     if (!formData.establishmentType) newErrors.establishmentType = "Le type d'établissement est requis.";
     if (formData.objectives.length === 0) newErrors.objectives = "Veuillez sélectionner au moins un objectif.";
+    if (formData.objectives.includes("Autre (à préciser dans le message)") && !formData.otherObjectiveMessage.trim()) {
+        newErrors.otherObjectiveMessage = "Veuillez préciser votre autre objectif.";
+    }
     if (!formData.budget) newErrors.budget = "Le budget est requis.";
     if (!formData.name.trim()) newErrors.name = "Votre nom est requis.";
     if (!formData.email.trim()) {
@@ -91,11 +95,11 @@ const QuestionnairePage: React.FC = () => {
   ];
   
   const budgetOptions = [
-    "Moins de 500€",
-    "500€ - 1,500€",
-    "1,500€ - 3,000€",
-    "3,000€ - 5,000€",
-    "Plus de 5,000€",
+    "Moins de 75,000 DZD",
+    "75,000 - 220,000 DZD",
+    "220,000 - 440,000 DZD",
+    "440,000 - 730,000 DZD",
+    "Plus de 730,000 DZD",
     "Je ne sais pas encore",
   ];
 
@@ -161,7 +165,22 @@ const QuestionnairePage: React.FC = () => {
                     <span className="text-gray-700">{obj}</span>
                   </label>
                 ))}
-                {errors.objectives && <p className="text-red-500 text-xs mt-1">{errors.objectives}</p>}
+                 {formData.objectives.includes("Autre (à préciser dans le message)") && (
+                  <div className="pl-10 mt-2 animate-fade-in">
+                    <label htmlFor="otherObjectiveMessage" className="block text-sm font-medium text-gray-700 mb-1">Veuillez préciser :</label>
+                    <textarea
+                      name="otherObjectiveMessage"
+                      id="otherObjectiveMessage"
+                      rows={3}
+                      value={formData.otherObjectiveMessage}
+                      onChange={handleInputChange}
+                      className={`block w-full px-4 py-3 bg-white border rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition-colors placeholder-gray-500 ${errors.otherObjectiveMessage ? 'border-red-500' : 'border-gray-300'}`}
+                      placeholder="Décrivez votre besoin spécifique ici..."
+                    />
+                    {errors.otherObjectiveMessage && <p className="text-red-500 text-xs mt-1">{errors.otherObjectiveMessage}</p>}
+                  </div>
+                )}
+                {errors.objectives && !formData.objectives.includes("Autre (à préciser dans le message)") && <p className="text-red-500 text-xs mt-1">{errors.objectives}</p>}
               </div>
             </div>
 
