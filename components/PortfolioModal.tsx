@@ -52,10 +52,10 @@ const PortfolioModal: React.FC<PortfolioModalProps> = ({ onClose }) => {
   }
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
     const newErrors = validate();
 
     if (Object.keys(newErrors).length > 0) {
+        e.preventDefault();
         setErrors(newErrors);
         const firstErrorKey = Object.keys(newErrors)[0] as keyof typeof newErrors;
         if (firstErrorKey) {
@@ -68,22 +68,6 @@ const PortfolioModal: React.FC<PortfolioModalProps> = ({ onClose }) => {
         return;
     }
     setErrors({});
-    
-    const subject = encodeURIComponent(`Demande de Portfolio de ${formData.companyName || formData.name}`);
-    const body = encodeURIComponent(
-`Bonjour,
-
-Je suis intéressé(e) et je souhaiterais voir votre portfolio complet.
-
-Nom: ${formData.name}
-Email: ${formData.email}
-Établissement: ${formData.companyName}
-`
-    );
-    const mailtoLink = `mailto:telyaagency@gmail.com?subject=${subject}&body=${body}`;
-    
-    window.location.href = mailtoLink;
-    onClose();
   };
 
   return ReactDOM.createPortal(
@@ -103,10 +87,14 @@ Email: ${formData.email}
               <h3 className="text-2xl font-bold text-gray-900 mb-2">Accéder au Portfolio</h3>
               <p className="text-gray-600 mb-6">Remplissez ce formulaire pour recevoir un accès exclusif à nos réalisations.</p>
               <form 
+                action="https://formsubmit.co/telyaagency@gmail.com" 
+                method="POST"
                 onSubmit={handleSubmit}
                 className="space-y-4 text-left"
-                noValidate
               >
+                  <input type="hidden" name="_next" value={`${window.location.origin}/thank-you`} />
+                  <input type="hidden" name="_subject" value={`Demande de Portfolio de ${formData.companyName || formData.name}`} />
+                  <input type="hidden" name="_captcha" value="false" />
                   <div>
                       <label htmlFor="modal-name" className="block text-sm font-medium text-gray-700 mb-1">Nom complet</label>
                       <input type="text" name="name" id="modal-name" value={formData.name} onChange={handleChange} placeholder="Votre nom" className={`w-full px-4 py-2 bg-gray-50 border rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition ${errors.name ? 'border-red-500' : 'border-gray-300'}`} required />
@@ -128,7 +116,7 @@ Email: ${formData.email}
                         type="submit"
                         className="w-full bg-brand-green-600 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-brand-green-700 transition-all duration-300 transform hover:scale-105 active:scale-100 shadow-lg"
                       >
-                        Préparer l'e-mail
+                        Envoyer la demande
                       </button>
                   </div>
               </form>

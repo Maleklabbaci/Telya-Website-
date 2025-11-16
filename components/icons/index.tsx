@@ -6,3 +6,5 @@ export * from './StrategyIcon';
 export * from './InfluencerIcon';
 export * from './DashboardIcon';
 export * from './VipBadgeIcon';
+export * from './MailIcon';
+export * from './PhoneIcon';

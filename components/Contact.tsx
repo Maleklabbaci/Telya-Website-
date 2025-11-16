@@ -1,114 +1,141 @@
 
-import React from 'react';
-
-const CheckIcon = () => (
-    <svg className="w-5 h-5 text-white" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-        <path d="M13.485 3.43l-7.928 7.928-3.535-3.536" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-    </svg>
-);
-
-const CrossIcon = () => (
-     <svg className="w-5 h-5 text-white" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-        <path d="M4 4l8 8m0-8l-8 8" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-    </svg>
-);
-
-const BrowserIcon = () => (
-    <svg className="w-20 h-20 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="2" y="4" width="20" height="16" rx="2" ry="2" />
-        <line x1="2" y1="8" x2="22" y2="8" />
-        <path d="M5 6h.01" />
-        <path d="M8 6h.01" />
-    </svg>
-);
-
-const CloudIcon = () => (
-     <svg className="w-20 h-20 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" />
-    </svg>
-);
-
-const ServerIcon = () => (
-    <svg className="w-20 h-20 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="2" y="2" width="20" height="8" rx="2" ry="2" />
-        <rect x="2" y="14" width="20" height="8" rx="2" ry="2" />
-        <line x1="6" y1="6" x2="6.01" y2="6" />
-        <line x1="6" y1="18" x2="6.01" y2="18" />
-    </svg>
-);
-
+import React, { useState, useEffect, useRef } from 'react';
+import { MailIcon } from './icons/MailIcon';
+import { PhoneIcon } from './icons/PhoneIcon';
 
 const Contact: React.FC = () => {
+    const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
+    const [errors, setErrors] = useState<{ [key: string]: string }>({});
+    const [isVisible, setIsVisible] = useState(false);
+    const sectionRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(([entry]) => {
+            if (entry.isIntersecting) {
+                setIsVisible(true);
+                observer.disconnect();
+            }
+        }, { threshold: 0.1 });
+
+        const currentRef = sectionRef.current;
+        if (currentRef) observer.observe(currentRef);
+        
+        return () => { if (currentRef) observer.unobserve(currentRef); };
+    }, []);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+        if (errors[name as keyof typeof errors]) {
+            setErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors[name as keyof typeof errors];
+                return newErrors;
+            });
+        }
+    };
+
+    const validate = () => {
+        const newErrors: { [key: string]: string } = {};
+        if (!formData.name.trim()) newErrors.name = "Le nom est requis.";
+        if (!formData.email.trim()) {
+            newErrors.email = "L'e-mail est requis.";
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+            newErrors.email = "L'adresse e-mail n'est pas valide.";
+        }
+        if (!formData.subject.trim()) newErrors.subject = "Le sujet est requis.";
+        if (!formData.message.trim()) newErrors.message = "Le message est requis.";
+        return newErrors;
+    };
+
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        const newErrors = validate();
+        if (Object.keys(newErrors).length > 0) {
+            e.preventDefault();
+            setErrors(newErrors);
+            return;
+        }
+        setErrors({});
+    };
+
     return (
-        <section id="contact" className="font-sans text-gray-700 bg-white py-20">
+        <section id="contact" ref={sectionRef} className="py-20 bg-gray-50">
             <div className="container mx-auto px-6">
-                 <div className="border-b border-gray-200 pb-8">
-                    <div className="flex items-center flex-wrap">
-                        <h1 className="text-4xl md:text-5xl text-gray-800 font-light mr-4">Web server is down</h1>
-                        <span className="bg-gray-200 text-gray-600 text-sm font-medium px-2 py-1 rounded-md mt-2 sm:mt-0">Error code 521</span>
-                    </div>
-                    <p className="mt-4 text-base md:text-lg text-gray-600">Visit <a href="https://www.cloudflare.com/5xx-error-landing/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">cloudflare.com</a> for more information.</p>
-                    <p className="mt-2 text-sm text-gray-500">2025-11-16 14:28:47 UTC</p>
+                <div className={`text-center mb-16 transition-opacity duration-1000 ease-out transform ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+                    <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900">Contactez-Nous</h2>
+                    <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
+                        Une question, un projet ? Nous sommes à votre écoute pour discuter de vos ambitions.
+                    </p>
                 </div>
 
-                <div className="relative bg-gray-50 border-b border-t border-gray-200 mt-8">
-                    <div className="container mx-auto px-6 py-12">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center divide-y md:divide-y-0 md:divide-x divide-gray-200">
-                            {/* You */}
-                            <div className="flex flex-col items-center pt-8 md:pt-0">
-                                <div className="relative mb-4">
-                                    <BrowserIcon />
-                                    <div className="absolute -bottom-2 -right-1 bg-green-500 rounded-full p-1.5 border-4 border-gray-50">
-                                        <CheckIcon />
-                                    </div>
-                                </div>
-                                <h2 className="text-lg font-semibold text-gray-800">You</h2>
-                                <p className="text-gray-400 text-2xl font-light">Browser</p>
-                                <p className="text-green-500 font-semibold text-xl">Working</p>
+                <div className={`grid md:grid-cols-2 gap-16 items-start transition-opacity duration-1000 ease-out ${isVisible ? 'opacity-100' : 'opacity-0'}`} style={{transitionDelay: '200ms'}}>
+                    <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-100">
+                        <form action="https://formsubmit.co/telyaagency@gmail.com" method="POST" onSubmit={handleSubmit} className="space-y-6">
+                            <input type="hidden" name="_next" value={`${window.location.origin}/thank-you`} />
+                            <input type="hidden" name="_subject" value={`Telya Contact: ${formData.subject}`} />
+                            <input type="hidden" name="_captcha" value="false" />
+                            <div>
+                                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Nom complet</label>
+                                <input type="text" name="name" id="name" value={formData.name} onChange={handleChange} placeholder="Votre nom" className={`w-full px-4 py-3 bg-gray-50 border rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition ${errors.name ? 'border-red-500' : 'border-gray-200'}`} required />
+                                {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
                             </div>
-
-                            {/* Cloudflare */}
-                            <div className="flex flex-col items-center pt-8 md:pt-0 md:pl-8">
-                                <div className="relative mb-4">
-                                    <CloudIcon />
-                                    <div className="absolute -bottom-2 -right-1 bg-green-500 rounded-full p-1.5 border-4 border-gray-50">
-                                        <CheckIcon />
-                                    </div>
-                                </div>
-                                <h2 className="text-lg font-semibold text-gray-800">Rome</h2>
-                                <p className="text-blue-600 text-2xl font-light">Cloudflare</p>
-                                <p className="text-green-500 font-semibold text-xl">Working</p>
+                            <div>
+                                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Adresse e-mail</label>
+                                <input type="email" name="email" id="email" value={formData.email} onChange={handleChange} placeholder="Votre e-mail" className={`w-full px-4 py-3 bg-gray-50 border rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition ${errors.email ? 'border-red-500' : 'border-gray-200'}`} required />
+                                {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
                             </div>
-                            
-                            {/* Host */}
-                            <div className="flex flex-col items-center pt-8 md:pt-0 md:pl-8">
-                                <div className="relative mb-4">
-                                    <ServerIcon />
-                                    <div className="absolute -bottom-2 -right-1 bg-red-500 rounded-full p-1.5 border-4 border-gray-50">
-                                        <CrossIcon />
-                                    </div>
-                                </div>
-                                <h2 className="text-lg font-semibold text-gray-800">telyaagency.com</h2>
-                                <p className="text-gray-400 text-2xl font-light">Host</p>
-                                <p className="text-red-500 font-semibold text-xl">Error</p>
+                            <div>
+                                <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">Sujet</label>
+                                <input type="text" name="subject" id="subject" value={formData.subject} onChange={handleChange} placeholder="L'objet de votre message" className={`w-full px-4 py-3 bg-gray-50 border rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition ${errors.subject ? 'border-red-500' : 'border-gray-200'}`} required />
+                                {errors.subject && <p className="text-red-500 text-xs mt-1">{errors.subject}</p>}
                             </div>
-                        </div>
+                            <div>
+                                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">Votre message</label>
+                                <textarea name="message" id="message" rows={5} value={formData.message} onChange={handleChange} placeholder="Parlez-nous de votre projet..." className={`w-full px-4 py-3 bg-gray-50 border rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition ${errors.message ? 'border-red-500' : 'border-gray-200'}`} required ></textarea>
+                                {errors.message && <p className="text-red-500 text-xs mt-1">{errors.message}</p>}
+                            </div>
+                            <div className="text-center">
+                                <button type="submit" className="w-full bg-brand-green-600 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-brand-green-700 transition-all duration-300 transform hover:scale-105 active:scale-100 shadow-lg">
+                                    Envoyer le message
+                                </button>
+                            </div>
+                        </form>
                     </div>
-                    <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[16px] border-l-transparent border-r-[16px] border-r-transparent border-t-[16px] border-t-gray-50"></div>
-                </div>
-            
-                <div className="pt-16">
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
-                        <div>
-                            <h3 className="text-2xl text-gray-800 font-light mb-4">What happened?</h3>
-                            <p className="text-base leading-relaxed text-gray-600">The web server is not returning a connection. As a result, the web page is not displaying.</p>
+                    
+                    <div className="space-y-8">
+                        <h3 className="text-2xl font-bold text-gray-900">Nos Coordonnées</h3>
+                        <div className="flex items-start space-x-4">
+                            <div className="bg-brand-green-100 text-brand-green-700 rounded-full p-3 flex-shrink-0">
+                                <MailIcon />
+                            </div>
+                            <div>
+                                <h4 className="font-semibold text-gray-800">Email</h4>
+                                <p className="text-gray-600">Discutons de votre projet et de vos ambitions.</p>
+                                <a href="mailto:telyaagency@gmail.com" className="text-brand-green-600 hover:underline font-medium break-all">telyaagency@gmail.com</a>
+                            </div>
                         </div>
-                        <div>
-                            <h3 className="text-2xl text-gray-800 font-light mb-4">What can I do?</h3>
-                            <p className="text-base leading-relaxed text-gray-600"><strong>If you are a visitor of this website:</strong></p>
-                            <p className="text-base leading-relaxed text-gray-600 mt-2">Please try again in a few minutes.</p>
+                        <div className="flex items-start space-x-4">
+                            <div className="bg-brand-green-100 text-brand-green-700 rounded-full p-3 flex-shrink-0">
+                                <PhoneIcon />
+                            </div>
+                            <div>
+                                <h4 className="font-semibold text-gray-800">Téléphone</h4>
+                                <p className="text-gray-600">Pour une réponse plus rapide, n'hésitez pas à nous appeler.</p>
+                                <a href="tel:+213697660969" className="text-brand-green-600 hover:underline font-medium">+213 (0) 697 66 09 69</a>
+                            </div>
                         </div>
-                     </div>
+                         <div className="pt-4">
+                            <h4 className="font-semibold text-gray-800 mb-3">Suivez-nous</h4>
+                            <div className="flex space-x-4">
+                               <a href="https://www.facebook.com/profile.php?id=61577443097904" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-brand-green-600 transition-colors">
+                                    <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fillRule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clipRule="evenodd"></path></svg>
+                                </a>
+                                <a href="https://www.instagram.com/telyaagency/" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-brand-green-600 transition-colors">
+                                    <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fillRule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.024.06 1.378.06 3.808s-.012 2.784-.06 3.808c-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.024.048-1.378.06-3.808.06s-2.784-.013-3.808-.06c-1.064-.049-1.791.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.048-1.024-.06-1.378-.06-3.808s.012-2.784.06-3.808c.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 016.345 2.525c.636-.247 1.363-.416 2.427-.465C9.803 2.013 10.157 2 12.315 2zM12 7a5 5 0 100 10 5 5 0 000-10zm0-2a7 7 0 110 14 7 7 0 010-14zm4.5-1.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" clipRule="evenodd"></path></svg>
+                                </a>
+                            </div>
+                         </div>
+                    </div>
                 </div>
             </div>
         </section>

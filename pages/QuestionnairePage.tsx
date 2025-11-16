@@ -66,9 +66,9 @@ const QuestionnairePage: React.FC = () => {
   }
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
     const newErrors = validate();
     if (Object.keys(newErrors).length > 0) {
+      e.preventDefault();
       setErrors(newErrors);
       const firstErrorKey = Object.keys(newErrors)[0];
       if (firstErrorKey) {
@@ -85,32 +85,6 @@ const QuestionnairePage: React.FC = () => {
     }
     
     setErrors({});
-
-    const subject = encodeURIComponent(`Nouveau projet de ${formData.companyName}`);
-    const body = encodeURIComponent(
-`Bonjour,
-
-Voici les détails d'une demande de projet soumise via le questionnaire de votre site.
-
-1. À propos de l'établissement
-- Nom: ${formData.companyName}
-- Type: ${formData.establishmentType}
-
-2. Objectifs
-- ${formData.objectives.join('\n- ')}
-${formData.objectives.includes("Autre (à préciser dans le message)") ? `\nPrécision: ${formData.otherObjectiveMessage}` : ''}
-
-3. Budget mensuel
-- ${formData.budget}
-
-4. Coordonnées
-- Nom: ${formData.name}
-- Email: ${formData.email}
-- Téléphone: ${formData.phone}
-`
-      );
-    const mailtoLink = `mailto:telyaagency@gmail.com?subject=${subject}&body=${body}`;
-    window.location.href = mailtoLink;
   };
 
   const objectivesOptions = [
@@ -147,10 +121,15 @@ ${formData.objectives.includes("Autre (à préciser dans le message)") ? `\nPré
 
         <div className="bg-white p-8 md:p-12 rounded-xl shadow-lg border border-gray-100">
             <form 
+              action="https://formsubmit.co/telyaagency@gmail.com" 
+              method="POST"
               onSubmit={handleSubmit} 
               className="space-y-12"
-              noValidate
             >
+              <input type="hidden" name="_next" value={`${window.location.origin}/thank-you`} />
+              <input type="hidden" name="_subject" value={`Nouveau projet de ${formData.companyName}`} />
+              <input type="hidden" name="_captcha" value="false" />
+
               <div className="animate-fade-in-content" style={{ animationDelay: '100ms' }}>
                 <h2 className="text-xl font-bold text-gray-800 mb-4 border-b-2 border-brand-green-200 pb-2">1. À propos de votre établissement</h2>
                 <div className="space-y-4 mt-4">
