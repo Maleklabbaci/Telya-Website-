@@ -90,22 +90,44 @@ const QuestionnairePage: React.FC = () => {
     setIsSubmitting(true);
     setSubmitError('');
 
-    const form = e.target as HTMLFormElement;
-    const formData = new FormData(form);
+    const htmlContent = `
+        <h1 style="font-family: Arial, sans-serif; color: #333;">Nouveau questionnaire de projet soumis</h1>
+        <hr>
+        <h2 style="font-family: Arial, sans-serif; color: #01592C;">1. À propos de l'établissement</h2>
+        <p><strong>Nom de l'établissement:</strong> ${formData.companyName}</p>
+        <p><strong>Type d'établissement:</strong> ${formData.establishmentType}</p>
+        <br>
+        <h2 style="font-family: Arial, sans-serif; color: #01592C;">2. Objectifs</h2>
+        <ul>
+            ${formData.objectives.map(obj => `<li>${obj}</li>`).join('')}
+        </ul>
+        ${formData.objectives.includes("Autre (à préciser dans le message)") ? `<p><strong>Précision (Autre):</strong> ${formData.otherObjectiveMessage.replace(/\n/g, '<br>')}</p>` : ''}
+        <br>
+        <h2 style="font-family: Arial, sans-serif; color: #01592C;">3. Budget</h2>
+        <p><strong>Budget marketing mensuel:</strong> ${formData.budget}</p>
+        <br>
+        <h2 style="font-family: Arial, sans-serif; color: #01592C;">4. Coordonnées</h2>
+        <p><strong>Nom complet:</strong> ${formData.name}</p>
+        <p><strong>Email:</strong> <a href="mailto:${formData.email}">${formData.email}</a></p>
+        <p><strong>Téléphone:</strong> ${formData.phone}</p>
+    `;
 
     try {
-        const response = await fetch(form.action, {
+        const response = await fetch('/api/send-email', {
             method: 'POST',
-            body: formData,
-            headers: { 'Accept': 'application/json' }
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name: formData.name,
+                email: formData.email,
+                subject: `Nouveau questionnaire projet de ${formData.companyName}`,
+                htmlContent: htmlContent,
+            }),
         });
 
         if (response.ok) {
             window.location.href = '/thank-you';
         } else {
-            const data = await response.json().catch(() => ({}));
-            const errorMessage = data?.message || "Une erreur s'est produite lors de l'envoi. Veuillez réessayer.";
-            setSubmitError(errorMessage);
+            setSubmitError("L'envoi de votre demande a échoué. Veuillez réessayer plus tard.");
         }
     } catch (error) {
         setSubmitError("Une erreur réseau s'est produite. Veuillez vérifier votre connexion et réessayer.");
@@ -148,14 +170,10 @@ const QuestionnairePage: React.FC = () => {
 
         <div className="bg-white p-8 md:p-12 rounded-xl shadow-lg border border-gray-100">
             <form 
-              action="https://formsubmit.co/telyaagency@gmail.com" 
-              method="POST"
               onSubmit={handleSubmit} 
+              noValidate
               className="space-y-12"
             >
-              <input type="hidden" name="_subject" value={`Nouveau projet de ${formData.companyName}`} />
-              <input type="hidden" name="_captcha" value="false" />
-
               <div className="animate-fade-in-content" style={{ animationDelay: '100ms' }}>
                 <h2 className="text-xl font-bold text-gray-800 mb-4 border-b-2 border-brand-green-200 pb-2">1. À propos de votre établissement</h2>
                 <div className="space-y-4 mt-4">
@@ -279,7 +297,7 @@ const QuestionnairePage: React.FC = () => {
                 >
                   {isSubmitting ? (
                       <>
-                          <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w.org/2000/svg" fill="none" viewBox="0 0 24 24">
                               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                           </svg>

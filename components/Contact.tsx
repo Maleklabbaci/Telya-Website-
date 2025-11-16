@@ -61,24 +61,32 @@ const Contact: React.FC = () => {
         setIsSubmitting(true);
         setSubmitError('');
 
-        const form = e.target as HTMLFormElement;
-        const formData = new FormData(form);
+        const htmlContent = `
+            <h2>Nouveau message depuis le formulaire de contact Telya</h2>
+            <p><strong>Nom:</strong> ${formData.name}</p>
+            <p><strong>Email:</strong> ${formData.email}</p>
+            <p><strong>Sujet:</strong> ${formData.subject}</p>
+            <hr>
+            <p><strong>Message:</strong></p>
+            <p>${formData.message.replace(/\n/g, '<br>')}</p>
+        `;
 
         try {
-            const response = await fetch(form.action, {
+            const response = await fetch('/api/send-email', {
                 method: 'POST',
-                body: formData,
-                headers: {
-                    'Accept': 'application/json'
-                }
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: formData.name,
+                    email: formData.email,
+                    subject: `Telya Contact: ${formData.subject}`,
+                    htmlContent: htmlContent,
+                }),
             });
 
             if (response.ok) {
                 window.location.href = '/thank-you';
             } else {
-                const data = await response.json().catch(() => ({}));
-                const errorMessage = data?.message || "Une erreur s'est produite lors de l'envoi. Veuillez réessayer.";
-                setSubmitError(errorMessage);
+                setSubmitError("L'envoi du message a échoué. Veuillez réessayer plus tard.");
             }
         } catch (error) {
             setSubmitError("Une erreur réseau s'est produite. Veuillez vérifier votre connexion et réessayer.");
@@ -99,9 +107,7 @@ const Contact: React.FC = () => {
 
                 <div className={`grid md:grid-cols-2 gap-16 items-start transition-opacity duration-1000 ease-out ${isVisible ? 'opacity-100' : 'opacity-0'}`} style={{transitionDelay: '200ms'}}>
                     <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-100">
-                        <form action="https://formsubmit.co/telyaagency@gmail.com" method="POST" onSubmit={handleSubmit} className="space-y-6">
-                            <input type="hidden" name="_subject" value={`Telya Contact: ${formData.subject}`} />
-                            <input type="hidden" name="_captcha" value="false" />
+                        <form onSubmit={handleSubmit} noValidate className="space-y-6">
                             <div>
                                 <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Nom complet</label>
                                 <input type="text" name="name" id="name" value={formData.name} onChange={handleChange} placeholder="Votre nom" className={`w-full px-4 py-3 bg-gray-50 border rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition ${errors.name ? 'border-red-500' : 'border-gray-200'}`} required />
@@ -130,7 +136,7 @@ const Contact: React.FC = () => {
                                 >
                                     {isSubmitting ? (
                                         <>
-                                            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                             </svg>

@@ -72,23 +72,30 @@ const PortfolioModal: React.FC<PortfolioModalProps> = ({ onClose }) => {
     setErrors({});
     setIsSubmitting(true);
     setSubmitError('');
-    
-    const form = e.target as HTMLFormElement;
-    const formData = new FormData(form);
 
+    const htmlContent = `
+        <h2>Nouvelle demande d'accès au portfolio</h2>
+        <p><strong>Nom:</strong> ${formData.name}</p>
+        <p><strong>Email:</strong> ${formData.email}</p>
+        <p><strong>Nom de l'établissement:</strong> ${formData.companyName}</p>
+    `;
+    
     try {
-        const response = await fetch(form.action, {
+        const response = await fetch('/api/send-email', {
             method: 'POST',
-            body: formData,
-            headers: { 'Accept': 'application/json' }
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name: formData.name,
+                email: formData.email,
+                subject: `Demande de Portfolio de ${formData.companyName}`,
+                htmlContent: htmlContent,
+            }),
         });
 
         if (response.ok) {
             window.location.href = '/thank-you';
         } else {
-            const data = await response.json().catch(() => ({}));
-            const errorMessage = data?.message || "Une erreur s'est produite. Veuillez réessayer.";
-            setSubmitError(errorMessage);
+            setSubmitError("L'envoi de la demande a échoué. Veuillez réessayer plus tard.");
         }
     } catch (error) {
         setSubmitError("Une erreur réseau s'est produite. Veuillez vérifier votre connexion et réessayer.");
@@ -114,13 +121,10 @@ const PortfolioModal: React.FC<PortfolioModalProps> = ({ onClose }) => {
               <h3 className="text-2xl font-bold text-gray-900 mb-2">Accéder au Portfolio</h3>
               <p className="text-gray-600 mb-6">Remplissez ce formulaire pour recevoir un accès exclusif à nos réalisations.</p>
               <form 
-                action="https://formsubmit.co/telyaagency@gmail.com" 
-                method="POST"
                 onSubmit={handleSubmit}
+                noValidate
                 className="space-y-4 text-left"
               >
-                  <input type="hidden" name="_subject" value={`Demande de Portfolio de ${formData.companyName || formData.name}`} />
-                  <input type="hidden" name="_captcha" value="false" />
                   <div>
                       <label htmlFor="modal-name" className="block text-sm font-medium text-gray-700 mb-1">Nom complet</label>
                       <input type="text" name="name" id="modal-name" value={formData.name} onChange={handleChange} placeholder="Votre nom" className={`w-full px-4 py-2 bg-gray-50 border rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition ${errors.name ? 'border-red-500' : 'border-gray-300'}`} required />
@@ -145,7 +149,7 @@ const PortfolioModal: React.FC<PortfolioModalProps> = ({ onClose }) => {
                       >
                          {isSubmitting ? (
                             <>
-                                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                 </svg>
