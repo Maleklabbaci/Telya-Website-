@@ -6,6 +6,8 @@ import { PhoneIcon } from './icons/PhoneIcon';
 const Contact: React.FC = () => {
     const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitError, setSubmitError] = useState('');
     const [isVisible, setIsVisible] = useState(false);
     const sectionRef = useRef<HTMLDivElement>(null);
 
@@ -48,14 +50,41 @@ const Contact: React.FC = () => {
         return newErrors;
     };
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
         const newErrors = validate();
         if (Object.keys(newErrors).length > 0) {
-            e.preventDefault();
             setErrors(newErrors);
             return;
         }
         setErrors({});
+        setIsSubmitting(true);
+        setSubmitError('');
+
+        const form = e.target as HTMLFormElement;
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                window.location.href = '/thank-you';
+            } else {
+                const data = await response.json().catch(() => ({}));
+                const errorMessage = data?.message || "Une erreur s'est produite lors de l'envoi. Veuillez réessayer.";
+                setSubmitError(errorMessage);
+            }
+        } catch (error) {
+            setSubmitError("Une erreur réseau s'est produite. Veuillez vérifier votre connexion et réessayer.");
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -71,7 +100,6 @@ const Contact: React.FC = () => {
                 <div className={`grid md:grid-cols-2 gap-16 items-start transition-opacity duration-1000 ease-out ${isVisible ? 'opacity-100' : 'opacity-0'}`} style={{transitionDelay: '200ms'}}>
                     <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-100">
                         <form action="https://formsubmit.co/telyaagency@gmail.com" method="POST" onSubmit={handleSubmit} className="space-y-6">
-                            <input type="hidden" name="_next" value={`${window.location.origin}/thank-you`} />
                             <input type="hidden" name="_subject" value={`Telya Contact: ${formData.subject}`} />
                             <input type="hidden" name="_captcha" value="false" />
                             <div>
@@ -95,9 +123,24 @@ const Contact: React.FC = () => {
                                 {errors.message && <p className="text-red-500 text-xs mt-1">{errors.message}</p>}
                             </div>
                             <div className="text-center">
-                                <button type="submit" className="w-full bg-brand-green-600 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-brand-green-700 transition-all duration-300 transform hover:scale-105 active:scale-100 shadow-lg">
-                                    Envoyer le message
+                                <button 
+                                    type="submit" 
+                                    disabled={isSubmitting}
+                                    className="w-full bg-brand-green-600 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-brand-green-700 transition-all duration-300 transform hover:scale-105 active:scale-100 shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
+                                >
+                                    {isSubmitting ? (
+                                        <>
+                                            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            Envoi en cours...
+                                        </>
+                                    ) : (
+                                        'Envoyer le message'
+                                    )}
                                 </button>
+                                {submitError && <p className="text-red-500 text-sm mt-2">{submitError}</p>}
                             </div>
                         </form>
                     </div>
