@@ -1,4 +1,6 @@
 
+
+
 import React, { useEffect, useState } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
@@ -13,6 +15,7 @@ import ThankYouPage from './pages/ThankYouPage';
 import ScrollToTopButton from './components/ScrollToTopButton';
 import QuestionnairePage from './pages/QuestionnairePage';
 import IntroPage from './pages/IntroPage';
+import IntroAnimation from './components/IntroAnimation';
 
 const MainSite: React.FC = () => {
 
@@ -35,6 +38,8 @@ const MainSite: React.FC = () => {
 
 const App: React.FC = () => {
   const [path, setPath] = useState(window.location.pathname);
+  const [isIntroVisible, setIsIntroVisible] = useState(sessionStorage.getItem('introShown') !== 'true');
+
 
   useEffect(() => {
     const onLocationChange = () => {
@@ -85,6 +90,16 @@ const App: React.FC = () => {
       document.removeEventListener('click', handleAnchorClick);
     };
   }, []);
+  
+  const handleIntroEnd = () => {
+    sessionStorage.setItem('introShown', 'true');
+    setIsIntroVisible(false);
+  };
+
+  if (isIntroVisible) {
+    return <IntroAnimation onAnimationEnd={handleIntroEnd} />;
+  }
+
 
   let content;
   if (path === '/admin') {

@@ -24,14 +24,23 @@ const Hero: React.FC = () => {
     return () => clearTimeout(textTimer);
   }, []);
 
-  // Effet pour l'IntersectionObserver qui déclenche le chargement de la vidéo
+  // Effet pour l'IntersectionObserver qui déclenche le chargement paresseux de la vidéo
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        // La section Hero est "au-dessus de la ligne de flottaison", elle sera donc immédiatement visible.
-        // L'observateur s'assure que nous ne chargeons la vidéo que lorsque le navigateur est prêt à l'afficher.
         if (entry.isIntersecting) {
-          setLoadVideo(true);
+          // Utilise requestIdleCallback pour charger la vidéo lorsque le navigateur est inactif,
+          // afin de ne pas bloquer le rendu initial et d'améliorer les performances.
+          if ('requestIdleCallback' in window) {
+            (window as any).requestIdleCallback(() => {
+              setLoadVideo(true);
+            }, { timeout: 2000 });
+          } else {
+            // Fallback pour les navigateurs plus anciens
+            setTimeout(() => {
+              setLoadVideo(true);
+            }, 500);
+          }
           observer.disconnect(); // Se déconnecte une fois visible pour éviter un déclenchement inutile
         }
       },
@@ -83,7 +92,7 @@ const Hero: React.FC = () => {
           // preload="metadata" permet de charger les informations de base de la vidéo sans télécharger le fichier entier.
           preload="metadata"
         >
-          {/* Les sources vidéo ne sont rendues que lorsque la section est visible, ce qui déclenche le chargement paresseux. */}
+          {/* Les sources vidéo ne sont rendues que lorsque loadVideo est vrai, ce qui déclenche le chargement paresseux. */}
           {loadVideo && video.sources.map((source, index) => (
              <source key={index} src={source.src} type={source.type} />
           ))}

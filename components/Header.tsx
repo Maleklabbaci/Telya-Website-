@@ -25,6 +25,7 @@ const NavLink: React.FC<NavLinkProps> = ({ href, label, isMobile = false, onClic
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const { isAdmin, logout } = useAuth();
   const headerRef = useRef<HTMLElement>(null);
 
@@ -34,10 +35,17 @@ const Header: React.FC = () => {
         setIsMenuOpen(false);
       }
     };
+    
+    const handleScroll = () => {
+        setIsScrolled(window.scrollY > 10);
+    };
 
     document.addEventListener('mousedown', handleClickOutside);
+    window.addEventListener('scroll', handleScroll);
+
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('scroll', handleScroll);
     };
   }, []);
 
@@ -49,7 +57,12 @@ const Header: React.FC = () => {
   ];
 
   return (
-    <header ref={headerRef} className="sticky top-0 z-50 bg-brand-green-700 shadow-lg">
+    <header 
+      ref={headerRef} 
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out ${
+        isScrolled || isMenuOpen ? 'bg-brand-green-700 shadow-lg' : 'bg-transparent'
+      }`}
+    >
       <div className="px-6 py-4">
         <div className="flex justify-between items-center">
           <a href="/">
