@@ -14,7 +14,6 @@ const QuestionnairePage: React.FC = () => {
     phone: '',
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -67,9 +66,9 @@ const QuestionnairePage: React.FC = () => {
   }
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     const newErrors = validate();
     if (Object.keys(newErrors).length > 0) {
-      e.preventDefault();
       setErrors(newErrors);
       const firstErrorKey = Object.keys(newErrors)[0];
       if (firstErrorKey) {
@@ -86,8 +85,32 @@ const QuestionnairePage: React.FC = () => {
     }
     
     setErrors({});
-    setIsSubmitting(true);
-    // Let the form submit normally
+
+    const subject = encodeURIComponent(`Nouveau projet de ${formData.companyName}`);
+    const body = encodeURIComponent(
+`Bonjour,
+
+Voici les détails d'une demande de projet soumise via le questionnaire de votre site.
+
+1. À propos de l'établissement
+- Nom: ${formData.companyName}
+- Type: ${formData.establishmentType}
+
+2. Objectifs
+- ${formData.objectives.join('\n- ')}
+${formData.objectives.includes("Autre (à préciser dans le message)") ? `\nPrécision: ${formData.otherObjectiveMessage}` : ''}
+
+3. Budget mensuel
+- ${formData.budget}
+
+4. Coordonnées
+- Nom: ${formData.name}
+- Email: ${formData.email}
+- Téléphone: ${formData.phone}
+`
+      );
+    const mailtoLink = `mailto:telyaagency@gmail.com?subject=${subject}&body=${body}`;
+    window.location.href = mailtoLink;
   };
 
   const objectivesOptions = [
@@ -109,8 +132,6 @@ const QuestionnairePage: React.FC = () => {
     "Je ne sais pas encore",
   ];
 
-  const nextUrl = typeof window !== 'undefined' ? `${window.location.origin}/thank-you` : '';
-
   return (
     <div className="bg-gray-50 min-h-screen py-12 px-4 sm:px-6 lg:px-8 font-sans">
       <div className="max-w-3xl mx-auto">
@@ -126,18 +147,10 @@ const QuestionnairePage: React.FC = () => {
 
         <div className="bg-white p-8 md:p-12 rounded-xl shadow-lg border border-gray-100">
             <form 
-              action="https://formsubmit.co/telyaagency@gmail.com" 
-              method="POST" 
               onSubmit={handleSubmit} 
               className="space-y-12"
               noValidate
             >
-              <input type="hidden" name="_subject" value={`Nouveau projet de ${formData.companyName}`} />
-              <input type="hidden" name="_captcha" value="false" />
-              <input type="hidden" name="_next" value={nextUrl} />
-              <input type="hidden" name="_autoresponse" value="Merci pour votre intérêt ! Votre projet a bien été soumis. Notre équipe vous recontactera très prochainement pour discuter des prochaines étapes." />
-              <input type="hidden" name="objectives" value={formData.objectives.join(', ')} />
-              
               <div className="animate-fade-in-content" style={{ animationDelay: '100ms' }}>
                 <h2 className="text-xl font-bold text-gray-800 mb-4 border-b-2 border-brand-green-200 pb-2">1. À propos de votre établissement</h2>
                 <div className="space-y-4 mt-4">
@@ -168,7 +181,7 @@ const QuestionnairePage: React.FC = () => {
                   <p className="text-sm font-medium text-gray-700">Quels sont vos principaux objectifs ? (plusieurs choix possibles)</p>
                   {objectivesOptions.map(obj => (
                     <label key={obj} className="flex items-center space-x-3 cursor-pointer p-2 rounded-md hover:bg-gray-50 transition-colors">
-                      <input type="checkbox" value={obj} checked={formData.objectives.includes(obj)} onChange={handleCheckboxChange} className="h-5 w-5 text-brand-green-600 border-gray-300 rounded focus:ring-brand-green-500" />
+                      <input type="checkbox" name="objectives" value={obj} checked={formData.objectives.includes(obj)} onChange={handleCheckboxChange} className="h-5 w-5 text-brand-green-600 border-gray-300 rounded focus:ring-brand-green-500" />
                       <span className="text-gray-700">{obj}</span>
                     </label>
                   ))}
@@ -253,22 +266,12 @@ const QuestionnairePage: React.FC = () => {
                  <a href="/" className="text-sm text-gray-600 hover:text-brand-green-700 hover:underline mb-4 block">
                     Retourner au site
                  </a>
+                 
                 <button
                   type="submit"
-                  disabled={isSubmitting}
-                  className="bg-brand-green-600 text-white font-bold py-3 px-10 rounded-full text-lg hover:bg-brand-green-700 transition-all duration-300 transform active:scale-95 shadow-lg hover:animate-gentle-pulse disabled:bg-gray-400 disabled:cursor-not-allowed disabled:animate-none flex items-center justify-center min-w-[280px] mx-auto"
+                  className="bg-brand-green-600 text-white font-bold py-3 px-10 rounded-full text-lg hover:bg-brand-green-700 transition-all duration-300 transform active:scale-95 shadow-lg hover:animate-gentle-pulse flex items-center justify-center min-w-[280px] mx-auto"
                 >
-                  {isSubmitting ? (
-                      <>
-                          <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          Envoi en cours...
-                      </>
-                  ) : (
-                      'Envoyer ma demande de projet'
-                  )}
+                  Envoyer ma demande de projet
                 </button>
               </div>
             </form>

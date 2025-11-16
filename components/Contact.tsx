@@ -16,7 +16,6 @@ const Contact: React.FC = () => {
   });
   const [file, setFile] = useState<File | null>(null);
   const [errors, setErrors] = useState<{ name?: string; email?: string; message?: string }>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [headerVisible, setHeaderVisible] = useState(false);
@@ -114,11 +113,11 @@ const Contact: React.FC = () => {
     return newErrors;
   }
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+ const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     const newErrors = validate();
 
     if (Object.keys(newErrors).length > 0) {
-        e.preventDefault();
         setErrors(newErrors);
         const firstErrorKey = Object.keys(newErrors)[0] as keyof typeof newErrors;
         if (firstErrorKey) {
@@ -132,11 +131,30 @@ const Contact: React.FC = () => {
     }
     
     setErrors({});
-    setIsSubmitting(true);
-    // Let the form submit normally...
-  };
 
-  const nextUrl = typeof window !== 'undefined' ? `${window.location.origin}/thank-you` : '';
+    const subject = encodeURIComponent(`Nouveau message de ${formData.companyName || formData.name}`);
+    let body = `Bonjour,
+
+J'ai essayé de vous contacter via le formulaire de votre site mais une erreur est survenue. Voici les détails de ma demande :
+
+Nom: ${formData.name}
+Email: ${formData.email}
+Établissement: ${formData.companyName}
+
+Message:
+${formData.message}
+`;
+
+    if (file) {
+      body += `\n\n---
+Note: Un fichier était prêt à être joint. Veuillez l'ajouter manuellement à cet e-mail avant de l'envoyer.
+Nom du fichier: ${file.name}
+---`;
+    }
+
+    const mailtoLink = `mailto:telyaagency@gmail.com?subject=${subject}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailtoLink;
+  };
 
   return (
     <section id="contact" className="py-20 bg-white">
@@ -155,19 +173,10 @@ const Contact: React.FC = () => {
           }`}
         >
             <form 
-              action="https://formsubmit.co/telyaagency@gmail.com" 
-              method="POST" 
-              encType="multipart/form-data"
               onSubmit={handleSubmit} 
               className="space-y-6"
               noValidate
             >
-              <input type="hidden" name="_subject" value={`Nouveau message de ${formData.companyName || formData.name}`} />
-              <input type="hidden" name="_captcha" value="false" />
-              <input type="hidden" name="_next" value={nextUrl} />
-              <input type="hidden" name="_autoresponse" value="Merci pour votre message ! Nous avons bien reçu votre demande et notre équipe vous recontactera dans les plus brefs délais." />
-
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Nom complet</label>
@@ -252,23 +261,13 @@ const Contact: React.FC = () => {
                 ></textarea>
                 {errors.message && <p className="text-red-500 text-xs mt-1">{errors.message}</p>}
               </div>
+              
               <div className="text-center">
                 <button
                   type="submit"
-                  disabled={isSubmitting}
-                  className="bg-brand-green-600 text-white font-bold py-3 px-10 rounded-full text-lg hover:bg-brand-green-700 transition-all duration-300 transform active:scale-95 shadow-lg hover:animate-gentle-pulse disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center w-64 mx-auto"
+                  className="bg-brand-green-600 text-white font-bold py-3 px-10 rounded-full text-lg hover:bg-brand-green-700 transition-all duration-300 transform active:scale-95 shadow-lg hover:animate-gentle-pulse flex items-center justify-center w-64 mx-auto"
                 >
-                  {isSubmitting ? (
-                    <>
-                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Envoi en cours...
-                    </>
-                  ) : (
-                    'Envoyer le Message'
-                  )}
+                  Envoyer le Message
                 </button>
               </div>
             </form>

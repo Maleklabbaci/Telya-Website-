@@ -1,7 +1,4 @@
 
-
-
-
 import React, { useEffect, useState } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
@@ -57,14 +54,14 @@ const App: React.FC = () => {
         const href = anchor.getAttribute('href');
         if (!href) return;
 
-        // Ignore clicks on non-HTTP links (e.g., mailto:, tel:)
-        if (anchor.protocol !== 'http:' && anchor.protocol !== 'https:') {
+        // This single condition robustly handles external links, mailto:, and tel: links.
+        // An internal link will have the same host.
+        // An external link will have a different host.
+        // A mailto: or tel: link will have an empty string for the host, which is different.
+        if (anchor.host !== window.location.host) {
           return;
         }
         
-        // External links
-        if (anchor.host !== window.location.host) return;
-
         // Hash links
         if (href.startsWith('#')) {
             const mainSitePath = ['/', '/index.html'].includes(window.location.pathname);
