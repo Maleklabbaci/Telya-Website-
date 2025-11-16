@@ -135,9 +135,7 @@ const QuestionnairePage: React.FC = () => {
               <input type="hidden" name="_captcha" value="false" />
               <input type="hidden" name="_next" value={nextUrl} />
               <input type="hidden" name="_autoresponse" value="Merci pour votre intérêt ! Votre projet a bien été soumis. Notre équipe vous recontactera très prochainement pour discuter des prochaines étapes." />
-              {/* This hidden input will aggregate selected objectives, though standard submission sends them as multiple params which is fine. This can be an explicit override if needed */}
-              <input type="hidden" name="objectives_summary" value={formData.objectives.join(', ')} />
-
+              <input type="hidden" name="objectives" value={formData.objectives.join(', ')} />
 
               <div className="animate-fade-in-content" style={{ animationDelay: '100ms' }}>
                 <h2 className="text-xl font-bold text-gray-800 mb-4 border-b-2 border-brand-green-200 pb-2">1. À propos de votre établissement</h2>
@@ -169,7 +167,7 @@ const QuestionnairePage: React.FC = () => {
                   <p className="text-sm font-medium text-gray-700">Quels sont vos principaux objectifs ? (plusieurs choix possibles)</p>
                   {objectivesOptions.map(obj => (
                     <label key={obj} className="flex items-center space-x-3 cursor-pointer p-2 rounded-md hover:bg-gray-50 transition-colors">
-                      <input type="checkbox" name="objectives" value={obj} checked={formData.objectives.includes(obj)} onChange={handleCheckboxChange} className="h-5 w-5 text-brand-green-600 border-gray-300 rounded focus:ring-brand-green-500" />
+                      <input type="checkbox" value={obj} checked={formData.objectives.includes(obj)} onChange={handleCheckboxChange} className="h-5 w-5 text-brand-green-600 border-gray-300 rounded focus:ring-brand-green-500" />
                       <span className="text-gray-700">{obj}</span>
                     </label>
                   ))}
