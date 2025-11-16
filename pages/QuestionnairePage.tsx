@@ -14,7 +14,6 @@ const QuestionnairePage: React.FC = () => {
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -66,7 +65,7 @@ const QuestionnairePage: React.FC = () => {
     return newErrors;
   }
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const newErrors = validate();
     if (Object.keys(newErrors).length > 0) {
@@ -87,33 +86,7 @@ const QuestionnairePage: React.FC = () => {
     
     setErrors({});
     setIsSubmitting(true);
-    setSubmitStatus('idle');
-    
-    const form = e.currentTarget;
-    const submissionData = new FormData(form);
-    
-    submissionData.set('objectives', formData.objectives.join(', '));
-    
-    try {
-      const response = await fetch(form.action, {
-        method: 'POST',
-        body: submissionData,
-        headers: {
-          'Accept': 'application/json',
-        },
-      });
-
-      if (response.ok) {
-        setSubmitStatus('success');
-      } else {
-        setSubmitStatus('error');
-      }
-    } catch (error) {
-      console.error('Submission failed', error);
-      setSubmitStatus('error');
-    } finally {
-      setIsSubmitting(false);
-    }
+    e.currentTarget.submit();
   };
 
   const objectivesOptions = [
@@ -151,15 +124,6 @@ const QuestionnairePage: React.FC = () => {
         </div>
 
         <div className="bg-white p-8 md:p-12 rounded-xl shadow-lg border border-gray-100">
-          {submitStatus === 'success' ? (
-            <div className="text-center py-10 animate-fade-in">
-              <h2 className="text-2xl font-bold text-brand-green-700 mb-4">Demande envoyée !</h2>
-              <p className="text-gray-600 mb-6">Merci pour votre intérêt. Nous avons bien reçu votre projet et notre équipe vous recontactera très prochainement.</p>
-              <a href="/" className="text-brand-green-600 hover:underline font-medium">
-                  Retourner au site
-              </a>
-            </div>
-          ) : (
             <form 
               action="https://formsubmit.co/telyaagency@gmail.com" 
               method="POST" 
@@ -171,6 +135,9 @@ const QuestionnairePage: React.FC = () => {
               <input type="hidden" name="_captcha" value="false" />
               <input type="hidden" name="_next" value={nextUrl} />
               <input type="hidden" name="_autoresponse" value="Merci pour votre intérêt ! Votre projet a bien été soumis. Notre équipe vous recontactera très prochainement pour discuter des prochaines étapes." />
+              {/* This hidden input will aggregate selected objectives, though standard submission sends them as multiple params which is fine. This can be an explicit override if needed */}
+              <input type="hidden" name="objectives_summary" value={formData.objectives.join(', ')} />
+
 
               <div className="animate-fade-in-content" style={{ animationDelay: '100ms' }}>
                 <h2 className="text-xl font-bold text-gray-800 mb-4 border-b-2 border-brand-green-200 pb-2">1. À propos de votre établissement</h2>
@@ -304,14 +271,8 @@ const QuestionnairePage: React.FC = () => {
                       'Envoyer ma demande de projet'
                   )}
                 </button>
-                 {submitStatus === 'error' && (
-                  <p className="text-red-500 text-sm mt-4">
-                      Une erreur est survenue lors de l'envoi. Veuillez réessayer plus tard.
-                  </p>
-              )}
               </div>
             </form>
-          )}
         </div>
       </div>
     </div>
