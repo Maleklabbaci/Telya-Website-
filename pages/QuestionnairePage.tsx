@@ -1,5 +1,4 @@
 
-
 import React, { useState } from 'react';
 import { TelyaLogo } from '../components/Logo';
 
@@ -16,8 +15,6 @@ const QuestionnairePage: React.FC = () => {
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitFailed, setSubmitFailed] = useState(false);
-  const [mailtoHref, setMailtoHref] = useState('mailto:telyaagency@gmail.com');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -69,11 +66,10 @@ const QuestionnairePage: React.FC = () => {
     return newErrors;
   }
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setSubmitFailed(false);
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     const newErrors = validate();
     if (Object.keys(newErrors).length > 0) {
+      e.preventDefault();
       setErrors(newErrors);
       const firstErrorKey = Object.keys(newErrors)[0];
       if (firstErrorKey) {
@@ -91,50 +87,7 @@ const QuestionnairePage: React.FC = () => {
     
     setErrors({});
     setIsSubmitting(true);
-
-    const form = e.currentTarget;
-    const data = new FormData(form);
-    // Append objectives array correctly for submission
-    data.set('objectives', formData.objectives.join(', '));
-
-    try {
-      const response = await fetch(form.action, {
-        method: form.method,
-        body: data,
-        headers: {
-          'Accept': 'application/json'
-        }
-      });
-
-      if (response.ok) {
-        window.location.href = '/thank-you';
-      } else {
-        throw new Error('Network response was not ok.');
-      }
-    } catch (error) {
-      console.error("Form submission error:", error);
-      const subject = encodeURIComponent(`Nouveau projet de ${formData.companyName}`);
-      let objectivesText = formData.objectives.join('\n- ');
-      if (formData.objectives.includes("Autre (à préciser dans le message)") && formData.otherObjectiveMessage) {
-          objectivesText += `\n  Précision: ${formData.otherObjectiveMessage}`;
-      }
-      const body = encodeURIComponent(
-          `Bonjour,\n\nVoici les détails de ma demande de projet :\n\n` +
-          `-- Établissement --\n` +
-          `Nom: ${formData.companyName}\n` +
-          `Type: ${formData.establishmentType}\n\n` +
-          `-- Objectifs --\n- ${objectivesText}\n\n` +
-          `-- Budget Mensuel --\n${formData.budget}\n\n` +
-          `-- Coordonnées --\n` +
-          `Nom du contact: ${formData.name}\n` +
-          `Email: ${formData.email}\n` +
-          `Téléphone: ${formData.phone}\n`
-      );
-      setMailtoHref(`mailto:telyaagency@gmail.com?subject=${subject}&body=${body}`);
-      setSubmitFailed(true);
-    } finally {
-      setIsSubmitting(false);
-    }
+    // Let the form submit normally
   };
 
   const objectivesOptions = [
@@ -183,8 +136,8 @@ const QuestionnairePage: React.FC = () => {
               <input type="hidden" name="_captcha" value="false" />
               <input type="hidden" name="_next" value={nextUrl} />
               <input type="hidden" name="_autoresponse" value="Merci pour votre intérêt ! Votre projet a bien été soumis. Notre équipe vous recontactera très prochainement pour discuter des prochaines étapes." />
-              {/* The objectives will be appended via FormData in JS */}
-
+              <input type="hidden" name="objectives" value={formData.objectives.join(', ')} />
+              
               <div className="animate-fade-in-content" style={{ animationDelay: '100ms' }}>
                 <h2 className="text-xl font-bold text-gray-800 mb-4 border-b-2 border-brand-green-200 pb-2">1. À propos de votre établissement</h2>
                 <div className="space-y-4 mt-4">
@@ -317,11 +270,6 @@ const QuestionnairePage: React.FC = () => {
                       'Envoyer ma demande de projet'
                   )}
                 </button>
-                 {submitFailed && (
-                   <p className="text-red-500 text-sm mt-4">
-                        Le service d'envoi est momentanément indisponible. Pour nous faire parvenir votre demande, <a href={mailtoHref} className="underline font-semibold hover:text-red-700">cliquez ici pour l'envoyer directement par e-mail</a>. Vos informations seront conservées.
-                    </p>
-                )}
               </div>
             </form>
         </div>

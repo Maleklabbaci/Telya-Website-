@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 
@@ -12,8 +11,6 @@ const PortfolioModal: React.FC<PortfolioModalProps> = ({ onClose }) => {
   const [formData, setFormData] = useState({ name: '', email: '', companyName: '' });
   const [errors, setErrors] = useState<{ name?: string; email?: string; companyName?: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitFailed, setSubmitFailed] = useState(false);
-  const [mailtoHref, setMailtoHref] = useState('mailto:telyaagency@gmail.com');
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -40,10 +37,8 @@ const PortfolioModal: React.FC<PortfolioModalProps> = ({ onClose }) => {
         setErrors(prev => ({ ...prev, [name]: undefined }));
     }
   };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setSubmitFailed(false);
+  
+  const validate = () => {
     const newErrors: { name?: string; email?: string; companyName?: string } = {};
 
     if (!formData.name.trim()) newErrors.name = "Le nom est requis.";
@@ -53,9 +48,15 @@ const PortfolioModal: React.FC<PortfolioModalProps> = ({ onClose }) => {
         newErrors.email = "L'adresse e-mail n'est pas valide.";
     }
     if (!formData.companyName.trim()) newErrors.companyName = "Le nom de l'établissement est requis.";
+    
+    return newErrors;
+  }
 
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const newErrors = validate();
 
     if (Object.keys(newErrors).length > 0) {
+        e.preventDefault();
         setErrors(newErrors);
         const firstErrorKey = Object.keys(newErrors)[0] as keyof typeof newErrors;
         if (firstErrorKey) {
@@ -69,38 +70,7 @@ const PortfolioModal: React.FC<PortfolioModalProps> = ({ onClose }) => {
     }
     setErrors({});
     setIsSubmitting(true);
-
-    const form = e.currentTarget;
-    const data = new FormData(form);
-
-    try {
-      const response = await fetch(form.action, {
-        method: form.method,
-        body: data,
-        headers: {
-          'Accept': 'application/json'
-        }
-      });
-
-      if (response.ok) {
-        window.location.href = '/thank-you';
-      } else {
-        throw new Error('Network response was not ok.');
-      }
-    } catch (error) {
-      console.error("Form submission error:", error);
-      const subject = encodeURIComponent(`Demande de Portfolio de ${formData.companyName || formData.name}`);
-      const body = encodeURIComponent(
-          `Bonjour,\n\nJe suis intéressé(e) et je souhaiterais voir votre portfolio complet.\n\n` +
-          `Nom: ${formData.name}\n` +
-          `Email: ${formData.email}\n` +
-          `Établissement: ${formData.companyName}\n`
-      );
-      setMailtoHref(`mailto:telyaagency@gmail.com?subject=${subject}&body=${body}`);
-      setSubmitFailed(true);
-    } finally {
-      setIsSubmitting(false);
-    }
+    // Form submits normally
   };
 
   const nextUrl = typeof window !== 'undefined' ? `${window.location.origin}/thank-you` : '';
@@ -168,11 +138,6 @@ const PortfolioModal: React.FC<PortfolioModalProps> = ({ onClose }) => {
                             'Envoyer la demande'
                         )}
                       </button>
-                      {submitFailed && (
-                          <p className="text-red-500 text-sm mt-4">
-                              Le service d'envoi est momentanément indisponible. Pour nous faire parvenir votre demande, <a href={mailtoHref} className="underline font-semibold hover:text-red-700">cliquez ici pour l'envoyer directement par e-mail</a>. Vos informations seront conservées.
-                          </p>
-                      )}
                   </div>
               </form>
             </>

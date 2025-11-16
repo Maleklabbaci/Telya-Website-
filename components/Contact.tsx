@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 const UploadIcon: React.FC = () => (
@@ -18,8 +17,6 @@ const Contact: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
   const [errors, setErrors] = useState<{ name?: string; email?: string; message?: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitFailed, setSubmitFailed] = useState(false);
-  const [mailtoHref, setMailtoHref] = useState('mailto:telyaagency@gmail.com');
   const [isDragging, setIsDragging] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [headerVisible, setHeaderVisible] = useState(false);
@@ -103,9 +100,7 @@ const Contact: React.FC = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setSubmitFailed(false);
+  const validate = () => {
     const newErrors: { name?: string; email?: string; message?: string } = {};
 
     if (!formData.name.trim()) newErrors.name = "Le nom complet est requis.";
@@ -115,8 +110,15 @@ const Contact: React.FC = () => {
         newErrors.email = "L'adresse e-mail n'est pas valide.";
     }
     if (!formData.message.trim()) newErrors.message = "Votre message est requis.";
+    
+    return newErrors;
+  }
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const newErrors = validate();
 
     if (Object.keys(newErrors).length > 0) {
+        e.preventDefault();
         setErrors(newErrors);
         const firstErrorKey = Object.keys(newErrors)[0] as keyof typeof newErrors;
         if (firstErrorKey) {
@@ -131,39 +133,7 @@ const Contact: React.FC = () => {
     
     setErrors({});
     setIsSubmitting(true);
-
-    const form = e.currentTarget;
-    const data = new FormData(form);
-
-    try {
-      const response = await fetch(form.action, {
-        method: form.method,
-        body: data,
-        headers: {
-          'Accept': 'application/json'
-        }
-      });
-
-      if (response.ok) {
-        window.location.href = '/thank-you';
-      } else {
-        throw new Error('Network response was not ok.');
-      }
-    } catch (error) {
-      console.error("Form submission error:", error);
-      const subject = encodeURIComponent(`Nouveau message de ${formData.companyName || formData.name}`);
-      const body = encodeURIComponent(
-          `Bonjour,\n\nVoici les détails de ma demande :\n\n` +
-          `Nom: ${formData.name}\n` +
-          `Email: ${formData.email}\n` +
-          `Établissement: ${formData.companyName || 'Non spécifié'}\n\n` +
-          `Message:\n${formData.message}\n`
-      );
-      setMailtoHref(`mailto:telyaagency@gmail.com?subject=${subject}&body=${body}`);
-      setSubmitFailed(true);
-    } finally {
-      setIsSubmitting(false);
-    }
+    // Let the form submit normally...
   };
 
   const nextUrl = typeof window !== 'undefined' ? `${window.location.origin}/thank-you` : '';
@@ -300,11 +270,6 @@ const Contact: React.FC = () => {
                     'Envoyer le Message'
                   )}
                 </button>
-                {submitFailed && (
-                   <p className="text-red-500 text-sm mt-4">
-                        Le service d'envoi est momentanément indisponible. Pour nous faire parvenir votre demande, <a href={mailtoHref} className="underline font-semibold hover:text-red-700">cliquez ici pour l'envoyer directement par e-mail</a>. Vos informations seront conservées.
-                    </p>
-                )}
               </div>
             </form>
         </div>
