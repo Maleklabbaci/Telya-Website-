@@ -2,9 +2,31 @@
 // Elle envoie un e-mail en utilisant l'API de Brevo (anciennement Sendinblue).
 // Note : Pour que cela fonctionne, l'e-mail de l'expéditeur ('telyaagency@gmail.com') doit être validé dans votre compte Brevo.
 
-// La clé API de Brevo est stockée de manière sécurisée dans une variable d'environnement.
-// IMPORTANT : Vous devez définir BREVO_API_KEY dans les variables d'environnement de votre projet Vercel.
-const brevoApiKey = process.env.BREVO_API_KEY;
+// Récupère la clé API Brevo depuis les variables d'environnement.
+function getBrevoApiKey() {
+  let apiKey = process.env.BREVO_API_KEY;
+
+  // Si la clé ressemble à une chaîne Base64 (comme celle partagée par l'utilisateur),
+  // on essaie de la décoder pour extraire la vraie clé.
+  // Cela rend le système plus robuste à une erreur de copier-coller courante.
+  if (apiKey && apiKey.startsWith('ey') && apiKey.endsWith('=')) {
+      try {
+          // Vercel utilise un environnement Node.js, on peut donc utiliser Buffer.
+          const decodedString = Buffer.from(apiKey, 'base64').toString('utf-8');
+          const parsedJson = JSON.parse(decodedString);
+          if (parsedJson && parsedJson.api_key) {
+              return parsedJson.api_key;
+          }
+      } catch (e) {
+          // Si le décodage échoue, ce n'était probablement pas ce qu'on pensait.
+          // On continue avec la clé telle quelle. L'API Brevo renverra une erreur si elle est invalide.
+          console.warn('La clé API Brevo ressemble à du Base64 mais n\'a pas pu être décodée. Utilisation de la valeur brute.');
+      }
+  }
+  
+  return apiKey;
+}
+
 
 export default async function handler(req, res) {
   // Autoriser les requêtes OPTIONS pour la pré-vérification CORS
@@ -22,6 +44,8 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Méthode non autorisée' });
   }
+
+  const brevoApiKey = getBrevoApiKey();
 
   if (!brevoApiKey) {
     console.error('Erreur de configuration du serveur : BREVO_API_KEY n\'est pas définie.');
