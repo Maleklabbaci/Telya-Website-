@@ -1,6 +1,12 @@
-// This is a Vercel serverless function that acts as a secure backend to process form submissions.
-// It uses the Brevo API (formerly Sendinblue) to send transactional emails.
-// IMPORTANT: For this to work, the BREVO_API_KEY must be set as an environment variable in your hosting provider (e.g., Vercel).
+// This is a Vercel serverless function that uses the Resend API to send emails.
+// It's a more modern and developer-friendly alternative to Brevo/Sendinblue.
+//
+// --- HOW TO CONFIGURE ---
+// 1. Go to https://resend.com and create a free account.
+// 2. Create a new API Key.
+// 3. Replace the placeholder 're_YOUR_API_KEY_HERE' below with your actual Resend API key.
+//
+// That's it! The form will work immediately.
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -8,55 +14,54 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  // Destructure all expected fields from the request body.
+  // This is the API key you get from resend.com
+  // IMPORTANT: Replace this placeholder with your actual key.
+  const apiKey = 're_YOUR_API_KEY_HERE';
+
+  if (apiKey === 're_YOUR_API_KEY_HERE') {
+    console.error("Resend API key is not configured.");
+    return res.status(500).json({ error: 'Email service is not configured on the server.' });
+  }
+
   const { name, email, subject, htmlContent } = req.body;
 
-  // Perform basic validation to ensure all required data is present.
   if (!name || !email || !subject || !htmlContent) {
-    return res.status(400).json({ error: 'Missing required fields. All fields are required.' });
+    return res.status(400).json({ error: 'Missing required fields.' });
   }
 
-  // Securely retrieve the API key from environment variables.
-  const apiKey = process.env.BREVO_API_KEY;
-  if (!apiKey) {
-      console.error("Brevo API key is not configured on the server.");
-      // Provide a generic error message to the client for security.
-      return res.status(500).json({ error: 'Server configuration error.' });
-  }
-
-  // Construct the email payload for the Brevo API.
+  // We use 'onboarding@resend.dev' as the sender.
+  // This is a special address provided by Resend that allows sending emails
+  // without having to complete complex domain verification steps (DNS records, etc.).
+  // This makes the setup much easier.
   const emailPayload = {
-      // Use a verified sender address for better deliverability.
-      sender: { name: 'Telya Site Web', email: 'contact@telya.agency' }, 
-      to: [{ email: 'telyaagency@gmail.com', name: 'Telya Agency' }],
-      // Set the user's email as the 'reply-to' address to allow direct replies.
-      replyTo: { email: email, name: name }, 
-      subject: subject,
-      htmlContent: htmlContent,
+    from: 'Telya Agency <onboarding@resend.dev>',
+    to: ['telyaagency@gmail.com'],
+    subject: subject,
+    html: htmlContent,
+    reply_to: email, // This allows you to directly "Reply" to the user from your inbox.
   };
 
   try {
-    // Make the API call to Brevo.
-    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+    const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'api-key': apiKey,
+        'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify(emailPayload),
     });
 
-    // Handle non-successful responses from the Brevo API.
     if (!response.ok) {
       const errorData = await response.json();
-      console.error('Brevo API Error:', errorData);
-      return res.status(response.status).json({ error: 'Failed to send the email.' });
+      console.error('Resend API Error:', errorData);
+      return res.status(response.status).json({ error: 'Failed to send the email via Resend.' });
     }
 
-    // Send a success response back to the client.
-    res.status(200).json({ success: true, message: 'Email sent successfully!' });
+    const data = await response.json();
+    res.status(200).json({ success: true, message: 'Email sent successfully!', data });
+
   } catch (error) {
     console.error('Internal Server Error:', error);
-    res.status(500).json({ error: 'An internal server error occurred while sending the email.' });
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 }
