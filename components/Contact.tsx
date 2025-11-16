@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 const UploadIcon: React.FC = () => (
@@ -16,6 +17,9 @@ const Contact: React.FC = () => {
   });
   const [file, setFile] = useState<File | null>(null);
   const [errors, setErrors] = useState<{ name?: string; email?: string; message?: string }>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitFailed, setSubmitFailed] = useState(false);
+  const [mailtoHref, setMailtoHref] = useState('mailto:telyaagency@gmail.com');
   const [isDragging, setIsDragging] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [headerVisible, setHeaderVisible] = useState(false);
@@ -99,8 +103,9 @@ const Contact: React.FC = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setSubmitFailed(false);
     const newErrors: { name?: string; email?: string; message?: string } = {};
 
     if (!formData.name.trim()) newErrors.name = "Le nom complet est requis.";
@@ -125,7 +130,40 @@ const Contact: React.FC = () => {
     }
     
     setErrors({});
-    e.currentTarget.submit();
+    setIsSubmitting(true);
+
+    const form = e.currentTarget;
+    const data = new FormData(form);
+
+    try {
+      const response = await fetch(form.action, {
+        method: form.method,
+        body: data,
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        window.location.href = '/thank-you';
+      } else {
+        throw new Error('Network response was not ok.');
+      }
+    } catch (error) {
+      console.error("Form submission error:", error);
+      const subject = encodeURIComponent(`Nouveau message de ${formData.companyName || formData.name}`);
+      const body = encodeURIComponent(
+          `Bonjour,\n\nVoici les détails de ma demande :\n\n` +
+          `Nom: ${formData.name}\n` +
+          `Email: ${formData.email}\n` +
+          `Établissement: ${formData.companyName || 'Non spécifié'}\n\n` +
+          `Message:\n${formData.message}\n`
+      );
+      setMailtoHref(`mailto:telyaagency@gmail.com?subject=${subject}&body=${body}`);
+      setSubmitFailed(true);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const nextUrl = typeof window !== 'undefined' ? `${window.location.origin}/thank-you` : '';
@@ -247,10 +285,26 @@ const Contact: React.FC = () => {
               <div className="text-center">
                 <button
                   type="submit"
-                  className="bg-brand-green-600 text-white font-bold py-3 px-10 rounded-full text-lg hover:bg-brand-green-700 transition-all duration-300 transform active:scale-95 shadow-lg hover:animate-gentle-pulse"
+                  disabled={isSubmitting}
+                  className="bg-brand-green-600 text-white font-bold py-3 px-10 rounded-full text-lg hover:bg-brand-green-700 transition-all duration-300 transform active:scale-95 shadow-lg hover:animate-gentle-pulse disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center w-64 mx-auto"
                 >
-                  Envoyer le Message
+                  {isSubmitting ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Envoi en cours...
+                    </>
+                  ) : (
+                    'Envoyer le Message'
+                  )}
                 </button>
+                {submitFailed && (
+                   <p className="text-red-500 text-sm mt-4">
+                        Le service d'envoi est momentanément indisponible. Pour nous faire parvenir votre demande, <a href={mailtoHref} className="underline font-semibold hover:text-red-700">cliquez ici pour l'envoyer directement par e-mail</a>. Vos informations seront conservées.
+                    </p>
+                )}
               </div>
             </form>
         </div>

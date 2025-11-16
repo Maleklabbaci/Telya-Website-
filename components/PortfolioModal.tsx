@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 
@@ -10,6 +11,9 @@ const PortfolioModal: React.FC<PortfolioModalProps> = ({ onClose }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState({ name: '', email: '', companyName: '' });
   const [errors, setErrors] = useState<{ name?: string; email?: string; companyName?: string }>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitFailed, setSubmitFailed] = useState(false);
+  const [mailtoHref, setMailtoHref] = useState('mailto:telyaagency@gmail.com');
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -37,8 +41,9 @@ const PortfolioModal: React.FC<PortfolioModalProps> = ({ onClose }) => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setSubmitFailed(false);
     const newErrors: { name?: string; email?: string; companyName?: string } = {};
 
     if (!formData.name.trim()) newErrors.name = "Le nom est requis.";
@@ -63,7 +68,39 @@ const PortfolioModal: React.FC<PortfolioModalProps> = ({ onClose }) => {
         return;
     }
     setErrors({});
-    e.currentTarget.submit();
+    setIsSubmitting(true);
+
+    const form = e.currentTarget;
+    const data = new FormData(form);
+
+    try {
+      const response = await fetch(form.action, {
+        method: form.method,
+        body: data,
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        window.location.href = '/thank-you';
+      } else {
+        throw new Error('Network response was not ok.');
+      }
+    } catch (error) {
+      console.error("Form submission error:", error);
+      const subject = encodeURIComponent(`Demande de Portfolio de ${formData.companyName || formData.name}`);
+      const body = encodeURIComponent(
+          `Bonjour,\n\nJe suis intéressé(e) et je souhaiterais voir votre portfolio complet.\n\n` +
+          `Nom: ${formData.name}\n` +
+          `Email: ${formData.email}\n` +
+          `Établissement: ${formData.companyName}\n`
+      );
+      setMailtoHref(`mailto:telyaagency@gmail.com?subject=${subject}&body=${body}`);
+      setSubmitFailed(true);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const nextUrl = typeof window !== 'undefined' ? `${window.location.origin}/thank-you` : '';
@@ -113,13 +150,29 @@ const PortfolioModal: React.FC<PortfolioModalProps> = ({ onClose }) => {
                       <input type="text" name="companyName" id="modal-companyName" value={formData.companyName} onChange={handleChange} placeholder="Ex: Hôtel Le Grand Panorama" className={`w-full px-4 py-2 bg-gray-50 border rounded-lg focus:ring-brand-green-500 focus:border-brand-green-500 transition ${errors.companyName ? 'border-red-500' : 'border-gray-300'}`} required/>
                       {errors.companyName && <p className="text-red-500 text-xs mt-1">{errors.companyName}</p>}
                   </div>
-                  <div className="pt-2">
+                  <div className="pt-2 text-center">
                       <button
                         type="submit"
-                        className="w-full bg-brand-green-600 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-brand-green-700 transition-all duration-300 transform hover:scale-105 active:scale-100 shadow-lg"
+                        disabled={isSubmitting}
+                        className="w-full bg-brand-green-600 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-brand-green-700 transition-all duration-300 transform hover:scale-105 active:scale-100 shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
                       >
-                        Envoyer la demande
+                        {isSubmitting ? (
+                            <>
+                                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Envoi...
+                            </>
+                        ) : (
+                            'Envoyer la demande'
+                        )}
                       </button>
+                      {submitFailed && (
+                          <p className="text-red-500 text-sm mt-4">
+                              Le service d'envoi est momentanément indisponible. Pour nous faire parvenir votre demande, <a href={mailtoHref} className="underline font-semibold hover:text-red-700">cliquez ici pour l'envoyer directement par e-mail</a>. Vos informations seront conservées.
+                          </p>
+                      )}
                   </div>
               </form>
             </>

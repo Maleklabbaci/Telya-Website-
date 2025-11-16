@@ -1,6 +1,7 @@
 
 
 
+
 import React, { useEffect, useState } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
@@ -55,6 +56,11 @@ const App: React.FC = () => {
         
         const href = anchor.getAttribute('href');
         if (!href) return;
+
+        // Ignore clicks on non-HTTP links (e.g., mailto:, tel:)
+        if (anchor.protocol !== 'http:' && anchor.protocol !== 'https:') {
+          return;
+        }
         
         // External links
         if (anchor.host !== window.location.host) return;
