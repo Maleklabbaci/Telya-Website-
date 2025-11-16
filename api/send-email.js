@@ -1,13 +1,13 @@
-// This is a serverless function compatible with Vercel.
-// It sends an email using the Brevo (formerly Sendinblue) API.
-// Note: For this to work, the sender email ('telyaagency@gmail.com') must be validated in your Brevo account.
+// Il s'agit d'une fonction serverless compatible avec Vercel.
+// Elle envoie un e-mail en utilisant l'API de Brevo (anciennement Sendinblue).
+// Note : Pour que cela fonctionne, l'e-mail de l'expéditeur ('telyaagency@gmail.com') doit être validé dans votre compte Brevo.
 
-// The Brevo API key is securely stored in an environment variable.
-// IMPORTANT: You must set BREVO_API_KEY in your Vercel project's environment variables.
+// La clé API de Brevo est stockée de manière sécurisée dans une variable d'environnement.
+// IMPORTANT : Vous devez définir BREVO_API_KEY dans les variables d'environnement de votre projet Vercel.
 const brevoApiKey = process.env.BREVO_API_KEY;
 
 export default async function handler(req, res) {
-  // Allow OPTIONS requests for CORS preflight
+  // Autoriser les requêtes OPTIONS pour la pré-vérification CORS
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -15,24 +15,29 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  // Set CORS headers for the main request
-  res.setHeader('Access-Control-Allow-Origin', '*'); // In production, restrict this to your domain
+  // Définir les en-têtes CORS pour la requête principale
+  // En production, il est recommandé de restreindre cette origine à votre domaine.
+  res.setHeader('Access-Control-Allow-Origin', '*'); 
 
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
+    return res.status(405).json({ error: 'Méthode non autorisée' });
   }
 
   if (!brevoApiKey) {
-    console.error('Server configuration error: BREVO_API_KEY is not set.');
-    return res.status(500).json({ error: 'Internal Server Error' });
+    console.error('Erreur de configuration du serveur : BREVO_API_KEY n\'est pas définie.');
+    return res.status(500).json({ error: 'Erreur de configuration du serveur : La clé API pour l\'envoi d\'e-mails n\'est pas configurée.' });
   }
 
   try {
-    const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-    const { name, email, subject, htmlContent } = body;
+    // Le body-parser de Vercel devrait automatiquement parser le corps JSON de la requête.
+    if (!req.body) {
+      return res.status(400).json({ error: 'Corps de la requête manquant.' });
+    }
+
+    const { name, email, subject, htmlContent } = req.body;
     
     if (!name || !email || !subject || !htmlContent) {
-      return res.status(400).json({ error: 'Missing required fields: name, email, subject, htmlContent' });
+      return res.status(400).json({ error: 'Champs requis manquants : nom, email, sujet, htmlContent.' });
     }
 
     const response = await fetch('https://api.brevo.com/v3/smtp/email', {
@@ -53,16 +58,16 @@ export default async function handler(req, res) {
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error('Brevo API Error:', errorData);
-      const errorMessage = errorData.message || 'An unknown error occurred.';
-      return res.status(response.status).json({ error: `Failed to send email: ${errorMessage}` });
+      console.error('Erreur API Brevo :', errorData);
+      const errorMessage = errorData.message || 'Une erreur inconnue est survenue.';
+      return res.status(response.status).json({ error: `L'envoi de l'e-mail a échoué : ${errorMessage}` });
     }
 
     const data = await response.json();
     return res.status(200).json({ success: true, data });
 
   } catch (error) {
-    console.error('Server Error:', error);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    console.error('Erreur serveur :', error);
+    return res.status(500).json({ error: 'Une erreur interne est survenue sur le serveur.' });
   }
 }
