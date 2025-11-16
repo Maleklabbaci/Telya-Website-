@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { TelyaLogo } from '../components/Logo';
 
@@ -90,39 +89,20 @@ const QuestionnairePage: React.FC = () => {
     setIsSubmitting(true);
     setSubmitError('');
 
-    const { companyName, establishmentType, objectives, otherObjectiveMessage, budget, name, email, phone } = formData;
-    const subject = `Nouveau projet de ${companyName}`;
-    const htmlContent = `
-        <h1>Nouvelle demande de projet via le questionnaire</h1>
-        <h2>1. À propos de l'établissement</h2>
-        <p><strong>Nom de l'établissement:</strong> ${companyName}</p>
-        <p><strong>Type d'établissement:</strong> ${establishmentType}</p>
-        
-        <h2>2. Objectifs</h2>
-        <ul>
-            ${objectives.map(obj => `<li>${obj}</li>`).join('')}
-        </ul>
-        ${objectives.includes("Autre (à préciser dans le message)") ? `<p><strong>Précision (Autre):</strong> ${otherObjectiveMessage.replace(/\n/g, '<br>')}</p>` : ''}
-        
-        <h2>3. Budget marketing mensuel</h2>
-        <p>${budget}</p>
-
-        <h2>4. Coordonnées</h2>
-        <p><strong>Nom complet:</strong> ${name}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Téléphone:</strong> ${phone}</p>
-    `;
+    // Les données du formulaire sont maintenant envoyées directement sous forme d'objet JSON structuré.
+    // C'est idéal pour des services comme Formspark pour une gestion facile des données et des intégrations.
+    const submissionData = {
+      ...formData,
+      objectives: formData.objectives.join(', '), // Convertit le tableau en chaîne de caractères pour une meilleure lisibilité dans les e-mails/sheets
+      _subject: `Nouveau projet de ${formData.companyName}`, // Sujet personnalisé pour l'e-mail Formspark
+      form_source: 'Questionnaire Page',
+    };
 
     try {
         const response = await fetch('/api/send-email', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                name,
-                email,
-                subject,
-                htmlContent
-            })
+            body: JSON.stringify(submissionData)
         });
 
         if (response.ok) {

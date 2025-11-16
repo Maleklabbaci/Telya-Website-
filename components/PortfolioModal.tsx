@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 
@@ -73,25 +72,17 @@ const PortfolioModal: React.FC<PortfolioModalProps> = ({ onClose }) => {
     setIsSubmitting(true);
     setSubmitError('');
     
-    const { name, email, companyName } = formData;
-    const subject = `Demande de Portfolio de ${companyName || name}`;
-    const htmlContent = `
-        <h2>Nouvelle demande d'accès au Portfolio</h2>
-        <p><strong>Nom:</strong> ${name}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Nom de l'établissement:</strong> ${companyName}</p>
-    `;
+    const submissionData = {
+        ...formData,
+        _subject: `Demande de Portfolio de ${formData.companyName || formData.name}`,
+        form_source: 'Portfolio Modal',
+    };
 
     try {
         const response = await fetch('/api/send-email', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                name,
-                email,
-                subject,
-                htmlContent
-            })
+            body: JSON.stringify(submissionData)
         });
 
         if (response.ok) {
